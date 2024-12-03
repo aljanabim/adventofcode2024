@@ -29,23 +29,10 @@ func checkReport(report []int) bool {
 	return true
 }
 func checkReportWithDampener(report []int) bool {
-	// isAccending := report[0] < report[1]
 	firstCheck := checkReport(report)
 	if firstCheck {
 		return true
 	} else {
-		// naughtyList := []int{}
-		// for i := range len(report) - 1 {
-		// 	diff := math.Abs(float64(report[i] - report[i+1]))
-		// 	if report[i] < report[i+1] != isAccending || diff < 1 || diff > 3 {
-		// 		naughtyList = append(naughtyList, i)
-		// 		// also add the last number to test removal
-		// 		if i == len(report)-2 {
-		// 			naughtyList = append(naughtyList, i+1)
-		// 		}
-		// 	}
-		// }
-		// fmt.Println(report, "Naughty numbers idx", naughtyList)
 		for n := range len(report) {
 			shortReport := append([]int{}, report[:n]...)
 			shortReport = append(shortReport, report[n+1:]...)
@@ -53,7 +40,6 @@ func checkReportWithDampener(report []int) bool {
 				return true
 			}
 		}
-
 	}
 	return false
 }
