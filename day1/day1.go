@@ -65,5 +65,4 @@ func Solve() {
 	utils.PrintSolution(1, 1, res)
 	res = solvePart2(l1, l2)
 	utils.PrintSolution(1, 2, res)
-
 }
