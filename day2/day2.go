@@ -1,7 +1,6 @@
 package day2
 
 import (
-	"fmt"
 	"math"
 	"os"
 	"strconv"
@@ -50,9 +49,7 @@ func checkReportWithDampener(report []int) bool {
 		for n := range len(report) {
 			shortReport := append([]int{}, report[:n]...)
 			shortReport = append(shortReport, report[n+1:]...)
-			fmt.Println("short", shortReport, "found bad at", n, checkReport(shortReport))
 			if checkReport(shortReport) {
-				fmt.Println(">>FOUND GOOD AT", n, "\n")
 				return true
 			}
 		}
