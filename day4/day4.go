@@ -14,20 +14,11 @@ depth   0123
 		||||
         SAMX
 
-
     MAS
     \|/
    B-X-S
 	/|\
 	MAB
-
-At depth 0: if X
-
-	inc depth
-	check every direction
-
-if at depth X or S look in every direction
-if
 */
 
 func boundaryCheck(fulltxt []string, row, col int) bool {
@@ -39,15 +30,6 @@ func boundaryCheck(fulltxt []string, row, col int) bool {
 	}
 	return true
 }
-
-/*
-went
-0123 (len(4))
-d 0 ok -> +1 ok
-d 1 ok -> +1 ok
-d 2 ok -> +1 ok
-d 3 ok -> +1 err
-*/
 
 func check(fulltxt []string, pattern string, direction [2]int, depth int, row, col int) (bool, error) {
 	if depth > len(pattern)-1 {
@@ -111,18 +93,10 @@ func solvePart1() int {
 }
 
 func solvePart2() int {
-
 	lines, err := utils.ReadLine("day4/input")
 	if err != nil {
 		log.Fatal(err)
 	}
-	// 	linesr := `AMAS
-	// MMAS
-	// XMAS
-	// BBBB
-	// `
-
-	// 	lines := strings.Split(linesr, "\n")
 	counter := 0
 	for i := range len(lines) - 2 {
 		r1 := lines[i]
@@ -131,11 +105,6 @@ func solvePart2() int {
 		cols := min(len(r1), len(r2), len(r3))
 		for j := range cols - 2 {
 			if r2[j+1] == 'A' && (r1[j] == 'M' && r3[j+2] == 'S' || r1[j] == 'S' && r3[j+2] == 'M') && (r3[j] == 'M' && r1[j+2] == 'S' || r3[j] == 'S' && r1[j+2] == 'M') {
-
-				// fmt.Println(r1[j : j+3])
-				// fmt.Println(r2[j : j+3])
-				// fmt.Println(r3[j : j+3])
-				// fmt.Println()
 				counter++
 			}
 		}
