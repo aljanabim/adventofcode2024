@@ -2,6 +2,7 @@ package day4
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/aljanabim/adventofcode2024/utils"
 )
@@ -28,17 +29,6 @@ At depth 0: if X
 if at depth X or S look in every direction
 if
 */
-
-var directions map[string][2]int = map[string][2]int{
-	"tl": {-1, -1},
-	"t":  {-1, 0},
-	"tr": {-1, 1},
-	"l":  {0, -1},
-	"r":  {0, 1},
-	"bl": {1, -1},
-	"b":  {1, 0},
-	"br": {1, 1},
-}
 
 func boundaryCheck(fulltxt []string, row, col int) bool {
 	if row < 0 || row >= len(fulltxt) {
@@ -78,6 +68,17 @@ func check(fulltxt []string, pattern string, direction [2]int, depth int, row, c
 }
 
 func solvePart1() int {
+	var directions map[string][2]int = map[string][2]int{
+		"tl": {-1, -1},
+		"t":  {-1, 0},
+		"tr": {-1, 1},
+		"l":  {0, -1},
+		"r":  {0, 1},
+		"bl": {1, -1},
+		"b":  {1, 0},
+		"br": {1, 1},
+	}
+
 	lines, err := utils.ReadLine("day4/input")
 	if err != nil {
 		panic(err)
@@ -108,7 +109,43 @@ func solvePart1() int {
 	}
 	return counter
 }
+
+func solvePart2() int {
+
+	lines, err := utils.ReadLine("day4/input")
+	if err != nil {
+		log.Fatal(err)
+	}
+	// 	linesr := `AMAS
+	// MMAS
+	// XMAS
+	// BBBB
+	// `
+
+	// 	lines := strings.Split(linesr, "\n")
+	counter := 0
+	for i := range len(lines) - 2 {
+		r1 := lines[i]
+		r2 := lines[i+1]
+		r3 := lines[i+2]
+		cols := min(len(r1), len(r2), len(r3))
+		for j := range cols - 2 {
+			if r2[j+1] == 'A' && (r1[j] == 'M' && r3[j+2] == 'S' || r1[j] == 'S' && r3[j+2] == 'M') && (r3[j] == 'M' && r1[j+2] == 'S' || r3[j] == 'S' && r1[j+2] == 'M') {
+
+				// fmt.Println(r1[j : j+3])
+				// fmt.Println(r2[j : j+3])
+				// fmt.Println(r3[j : j+3])
+				// fmt.Println()
+				counter++
+			}
+		}
+	}
+	return counter
+
+}
 func Solve() {
 	res := solvePart1()
 	utils.PrintSolution(4, 1, res)
+	res = solvePart2()
+	utils.PrintSolution(4, 2, res)
 }
