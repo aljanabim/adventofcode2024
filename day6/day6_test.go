@@ -27,7 +27,7 @@ func TestSolvePart1(t *testing.T) {
 	}
 }
 
-func TestSolvePart2(t *testing.T) {
+func TestSolvePart2_first(t *testing.T) {
 	linesTxt := `....#.....
 .........#
 ..........
@@ -45,30 +45,28 @@ func TestSolvePart2(t *testing.T) {
 	got := solvePart2(gridObstacles, currPos, rows, cols)
 	want := 6
 	if got != want {
-		t.Fatalf("solvePart2 want %d got %d", want, got)
+		t.Errorf("solvePart2 want %d got %d", want, got)
 	}
 }
 
-/*
-....#.....
-....xxxxx#
-....x...x.
-..#.x...x.
-..xxxxx#x.
-..x.x.x.x.
-.#xxxxxxx.
-.xxxxxxx#.
-#xxxxxxx..
-......#x..
+func TestSolvePart2_second(t *testing.T) {
+	linesTxt := `....#.....
+.........#
+..........
+..........
+.#........
+........#.
+....^.....
+..........
+..........
+..........`
 
-....#.....
-....XXXXX#
-....X...X.
-..#.X...X.
-..XXXXX#X.
-..X.X.X.X.
-.#XoXXXXX.
-.XXXXXoo#.
-#oXoXXXX..
-......#o..
-*/
+	lines := strings.Split(linesTxt, "\n")
+	rows, cols, gridObstacles, currPos := buildGrid(lines)
+
+	got := solvePart2(gridObstacles, currPos, rows, cols)
+	want := 1
+	if got != want {
+		t.Errorf("solvePart2 want %d got %d", want, got)
+	}
+}

@@ -106,33 +106,108 @@ func checkObstacleLoop(obs1, obs2, obs3 [3]int, visits map[[2]int]bool) bool {
 	return false
 }
 
+/*
+....#.....
+....xxxxx#
+....x...x.
+..#.x...x.
+..xxxxx#x.
+..x.x.x.x.
+.#xxxxxxx.
+.xxxxxxx#.
+#xxxxxxx..
+......#x..
+
+....#.....
+....01111#
+....0...2.
+..#.0...2.
+..01011#2.
+..0.0.2.2.
+.#3o^3332.
+.01111oo#.
+#o3o3322..
+......#o..
+*/
+
 func solvePart2(obstacles obstacles, pos [2]int, rows, cols int) int {
+	// visits := [][3]int{}
 	visits := map[[2]int]bool{}
-	obstaclesInPath := [][3]int{}
+	// obstaclesInPath := [][3]int{}
+	obstaclesInPath := map[[2]int]int{}
 	currentDirection := 0
-	obscount := 0
+
+	// newObsCount := 0
+	// newObstacles := [][2]int{}
+	// obscount := 0
+	newObsCount := 0
 	for inside(pos, rows, cols) {
 		visits[pos] = true
+		// only log visits after the first obstacle
+		// if obscount > 0 {
+		// 	visits = append(visits, [3]int{pos[0], pos[1], currentDirection})
+		// }
 		newPos := step(pos, currentDirection)
+		isNewPosObs := false
 		if obs, ok := obstacles[newPos]; ok {
 			if obs {
-				obstaclesInPath = append(obstaclesInPath, [3]int{newPos[0], newPos[1], currentDirection})
+				isNewPosObs = true
+				obstaclesInPath[newPos] = currentDirection
 				currentDirection = (currentDirection + 1) % len(directions)
-				// obstacleInPath[obscount] =
-				obscount++
-				continue
 			}
 		}
-		pos = newPos
-	}
+		if !isNewPosObs {
+			pos = newPos
+		}
+		dir := currentDirection
+		newObs := step(step(pos, dir), dir)
+		newDir := (dir + 1) % len(directions)
+		foundCompatableObs := false
+		// fmt.Println(pos, "smash dir", dir, "new obs", newObs, "compatible obs")
+		if _, ok := obstaclesInPath[newObs]; !ok { // newObstacle cannot be existing obstacle
+			for obs, smashDir := range obstaclesInPath {
+				if newDir == 0 {
+					if obs[0] < newObs[0] && obs[1] == newObs[1]+1 && smashDir == newDir {
+						foundCompatableObs = true
+						fmt.Println(">> smash dir", dir, "new obs", newObs, "compatible obs", obs)
+					}
+				} else if newDir == 1 {
+					if obs[0] == newObs[0]+1 && obs[1] > newObs[1] && smashDir == newDir {
+						fmt.Println(">> smash dir", dir, "new obs", newObs, "compatible obs", obs)
+					}
+				} else if newDir == 2 {
+					if obs[0] > newObs[0] && obs[1] == newObs[1]-1 && smashDir == newDir {
+						foundCompatableObs = true
+						fmt.Println(">> smash dir", dir, "new obs", newObs, "compatible obs", obs)
+					}
+				} else if newDir == 3 {
+					if obs[0] == newObs[0]-1 && obs[1] < newObs[1] && smashDir == newDir {
+						foundCompatableObs = true
+						fmt.Println(">> smash dir", dir, "new obs", newObs, "compatible obs", obs)
+					}
+				}
 
-	loopCount := 0
-	for i := range len(obstaclesInPath) - 2 {
-		if checkObstacleLoop(obstaclesInPath[i], obstaclesInPath[i+1], obstaclesInPath[i+2], visits) {
-			loopCount += 1
+			}
+			// fmt.Println("suggested obs", newObs, "is new")
+			// fmt.Println("looking for obstacle with", "row", newObs[0]+1, "col >", newObs[1])
+			// fmt.Println("pos", pos, "dir", dir, newDir, newObs, foundCompatableObs)
+		}
+		if foundCompatableObs {
+			newObsCount++
 		}
 	}
-	return loopCount
+	fmt.Println("New obs count", newObsCount)
+
+	// fmt.Println(obstaclesInPath)
+
+	// loopCount := 0
+	// for i := range len(obstaclesInPath) - 2 {
+	// 	if checkObstacleLoop(obstaclesInPath[i], obstaclesInPath[i+1], obstaclesInPath[i+2], visits) {
+	// 		loopCount += 1
+	// 	}
+	// }
+	fmt.Println("in pos", len(visits))
+	return newObsCount
 
 }
 
@@ -171,17 +246,6 @@ func Solve() {
 
 	res := solvePart1(gridObstacles, currPos, rows, cols)
 	utils.PrintSolution(6, 1, res)
+	res = solvePart2(gridObstacles, currPos, rows, cols)
+	utils.PrintSolution(6, 2, res)
 }
-
-/*
-....#.....
-....XXXXX#
-....X...X.
-..#.X...X.
-..XXXXX#X.
-..X.X.X.X.
-.#XXXXXXX.
-.XXXXXXX#.
-#XXXXXXX..
-......#X..
-*/
