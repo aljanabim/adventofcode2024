@@ -23,8 +23,9 @@ func parseRule(rule string) (int, int, error) {
 
 }
 
-func solvePart1(pageRules, updatedPages string) int {
+func solveBothParts(pageRules, updatedPages string) (int, int) {
 	totMids := 0
+	totMidsCorrected := 0
 	printPages := strings.Split(updatedPages, "\n")
 	for _, printPage := range printPages {
 		rules := map[int]int{}
@@ -63,16 +64,19 @@ func solvePart1(pageRules, updatedPages string) int {
 				correctOrder = false
 			}
 		}
-		out := make([]int, len(rules))
-		for k, v := range rules {
-			out[v] = k
-		}
 		if correctOrder {
 			midNum := printNums[len(printNums)/2]
 			totMids += int(midNum)
+		} else {
+			sortedPages := make([]int, len(rules))
+			for k, v := range rules {
+				sortedPages[v] = k
+			}
+			midNum := sortedPages[len(printNums)/2]
+			totMidsCorrected += int(midNum)
 		}
 	}
-	return totMids
+	return totMids, totMidsCorrected
 }
 
 func Solve() {
@@ -85,6 +89,7 @@ func Solve() {
 	pageRules := sections[0]
 	updatedPages := sections[1]
 
-	res := solvePart1(pageRules, updatedPages)
+	res, resCorrected := solveBothParts(pageRules, updatedPages)
 	utils.PrintSolution(5, 1, res)
+	utils.PrintSolution(5, 2, resCorrected)
 }
