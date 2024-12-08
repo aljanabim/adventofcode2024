@@ -41,67 +41,6 @@ func solvePart1(obstacles obstacles, pos [2]int, rows, cols int) int {
 	return len(visits)
 }
 
-func topCheck(obs1, obs2 [3]int) bool {
-	return obs1[0]+1 == obs2[0] && obs1[1] < obs2[1]
-}
-func rightCheck(obs1, obs2 [3]int) bool {
-	return obs1[0] < obs2[0] && obs1[1]-1 == obs2[1]
-}
-func leftCheck(obs1, obs2 [3]int) bool {
-	return obs1[0] > obs2[0] && obs1[1]+1 == obs2[1]
-}
-func bottomCheck(obs1, obs2 [3]int) bool {
-	return obs2[1] < obs1[1] && obs1[0]-1 == obs2[0]
-}
-
-func checkObstacleLoop(obs1, obs2, obs3 [3]int, visits map[[2]int]bool) bool {
-	dir := obs1[2]
-	if dir == 0 { // obs1 is top left
-		tc := topCheck(obs1, obs2)
-		rc := rightCheck(obs2, obs3)
-		newObs := [2]int{obs3[0] - 1, obs1[1] - 1}
-		_, onPath := visits[newObs]
-
-		if tc && rc && onPath {
-			fmt.Println("dir", dir, "obs1", obs1, "new obstacle at", newObs)
-			return true
-		}
-	} else if dir == 1 { // obs1 is top right
-		rc := rightCheck(obs1, obs2)
-		bc := bottomCheck(obs2, obs3)
-		newObs := [2]int{obs1[0] - 1, obs3[1] + 1}
-		_, onPath := visits[newObs]
-		if rc && bc && onPath {
-			fmt.Println("dir", dir, "obs1", obs1, "new obstacle at", newObs)
-			return true
-		}
-
-	} else if dir == 2 { // obs1 is bottom right
-		tc := bottomCheck(obs1, obs2)
-		rc := leftCheck(obs2, obs3)
-		newObs := [2]int{obs3[0] + 1, obs1[1] + 1}
-		_, onPath := visits[newObs]
-
-		if tc && rc && onPath {
-			fmt.Println("dir", dir, "obs1", obs1, "new obstacle at", newObs)
-			return true
-		}
-
-	} else if dir == 3 { // obs1 is bottom left
-		tc := leftCheck(obs1, obs2)
-		rc := topCheck(obs2, obs3)
-		newObs := [2]int{obs1[0] + 1, obs3[1] - 1}
-		_, onPath := visits[newObs]
-
-		if tc && rc && onPath {
-			fmt.Println("dir", dir, "obs1", obs1, "new obstacle at", newObs)
-			return true
-		}
-	}
-
-	return false
-}
-
 /*
 ....#.....
 ....xxxxx#
