@@ -43,8 +43,9 @@ func TestSolvePart2_first(t *testing.T) {
 	lines := strings.Split(linesTxt, "\n")
 	rows, cols, gridObstacles, currPos := buildGrid(lines)
 
+	fmt.Println(gridObstacles)
 	got, newObs := solvePart2(gridObstacles, currPos, rows, cols)
-	for _, obs := range newObs {
+	for obs, _ := range newObs {
 		if obs[0] >= 0 && obs[0] < len(lines) {
 			lines[obs[0]] = lines[obs[0]][:obs[1]] + "O" + lines[obs[0]][obs[1]+1:]
 		}
@@ -81,11 +82,27 @@ func TestSolvePart2_second(t *testing.T) {
 ..........
 ..........`
 
+	/*
+	   	linesTxt = `##..
+	   ...#
+	   ....
+	   ^.#.` // expects 0
+
+	   	linesTxt = `.#...
+	   ....#
+	   .....
+	   .^.#.
+	   #....
+	   ..#..
+	   ` // expects 3
+	*/
+
 	lines := strings.Split(linesTxt, "\n")
 	rows, cols, gridObstacles, currPos := buildGrid(lines)
 
 	got, newObs := solvePart2(gridObstacles, currPos, rows, cols)
-	for _, obs := range newObs {
+	fmt.Println(newObs)
+	for obs, _ := range newObs {
 		if obs[0] >= 0 && obs[0] < len(lines) {
 			lines[obs[0]] = lines[obs[0]][:obs[1]] + "O" + lines[obs[0]][obs[1]+1:]
 		}
@@ -93,7 +110,7 @@ func TestSolvePart2_second(t *testing.T) {
 	for _, line := range lines {
 		fmt.Println(line)
 	}
-	want := 3
+	want := 4
 	if got != want {
 		t.Errorf("solvePart2 want %d got %d", want, got)
 	}
