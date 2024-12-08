@@ -130,22 +130,49 @@ func checkObstacleLoop(obs1, obs2, obs3 [3]int, visits map[[2]int]bool) bool {
 ......#o..
 */
 
-func solvePart2(obstacles obstacles, pos [2]int, rows, cols int) int {
-	// visits := [][3]int{}
-	visits := map[[2]int]bool{}
+func isLoop(obstacles obstacles, pos [2]int, rows, cols int) bool {
+	MAXSTEPS := rows * cols
+	steps := 0
+	dir := 0
+
+	for {
+		if !inside(pos, rows, cols) {
+			return false
+		}
+		if steps > MAXSTEPS {
+			return true
+		}
+
+		newPos := step(pos, dir)
+		isNewPosObs := false
+		if obs, ok := obstacles[newPos]; ok {
+			if obs {
+				isNewPosObs = true
+				dir = (dir + 1) % len(directions)
+			}
+		}
+		if !isNewPosObs {
+			pos = newPos
+		}
+	}
+}
+
+func solvePart2(obstacles obstacles, pos [2]int, rows, cols int) (int, [][2]int) {
+	visits := [][3]int{}
+	// visits := map[[2]int]bool{}
 	// obstaclesInPath := [][3]int{}
 	obstaclesInPath := map[[2]int]int{}
 	currentDirection := 0
 
 	// newObsCount := 0
-	// newObstacles := [][2]int{}
+	newObstacles := [][2]int{}
 	// obscount := 0
 	newObsCount := 0
 	for inside(pos, rows, cols) {
-		visits[pos] = true
+		// visits[pos] = true
 		// only log visits after the first obstacle
 		// if obscount > 0 {
-		// 	visits = append(visits, [3]int{pos[0], pos[1], currentDirection})
+		visits = append(visits, [3]int{pos[0], pos[1], currentDirection})
 		// }
 		newPos := step(pos, currentDirection)
 		isNewPosObs := false
@@ -159,34 +186,42 @@ func solvePart2(obstacles obstacles, pos [2]int, rows, cols int) int {
 		if !isNewPosObs {
 			pos = newPos
 		}
-		dir := currentDirection
-		newObs := step(step(pos, dir), dir)
+
+	}
+	for _, visit := range visits {
+		pos := [2]int(visit[:2])
+		dir := visit[2]
+		newObs := step(pos, dir)
 		newDir := (dir + 1) % len(directions)
 		foundCompatableObs := false
-		// fmt.Println(pos, "smash dir", dir, "new obs", newObs, "compatible obs")
+		// fmt.Println(pos, "smash dir", dir, "new obs", newObs)
 		if _, ok := obstaclesInPath[newObs]; !ok { // newObstacle cannot be existing obstacle
 			for obs, smashDir := range obstaclesInPath {
 				if newDir == 0 {
-					if obs[0] < newObs[0] && obs[1] == newObs[1]+1 && smashDir == newDir {
+					if obs[0] < pos[0] && obs[1] == pos[1] && smashDir == newDir {
 						foundCompatableObs = true
-						fmt.Println(">> smash dir", dir, "new obs", newObs, "compatible obs", obs)
 					}
 				} else if newDir == 1 {
-					if obs[0] == newObs[0]+1 && obs[1] > newObs[1] && smashDir == newDir {
-						fmt.Println(">> smash dir", dir, "new obs", newObs, "compatible obs", obs)
+					if obs[0] == pos[0] && obs[1] > pos[1] && smashDir == newDir {
+						foundCompatableObs = true
 					}
 				} else if newDir == 2 {
-					if obs[0] > newObs[0] && obs[1] == newObs[1]-1 && smashDir == newDir {
+					if obs[0] > pos[0] && obs[1] == pos[1] && smashDir == newDir {
 						foundCompatableObs = true
-						fmt.Println(">> smash dir", dir, "new obs", newObs, "compatible obs", obs)
 					}
 				} else if newDir == 3 {
-					if obs[0] == newObs[0]-1 && obs[1] < newObs[1] && smashDir == newDir {
+					if obs[0] == pos[0] && obs[1] < pos[1] && smashDir == newDir {
 						foundCompatableObs = true
-						fmt.Println(">> smash dir", dir, "new obs", newObs, "compatible obs", obs)
 					}
 				}
-
+				if newObs == [2]int{4, 8} {
+					fmt.Println(pos, "smash dir", dir, "new obs", newObs, "compatible obs", obs)
+				}
+				if foundCompatableObs {
+					fmt.Println(">> smash dir", dir, "new obs", newObs, "compatible obs", obs)
+					newObstacles = append(newObstacles, newObs)
+					break
+				}
 			}
 			// fmt.Println("suggested obs", newObs, "is new")
 			// fmt.Println("looking for obstacle with", "row", newObs[0]+1, "col >", newObs[1])
@@ -206,8 +241,7 @@ func solvePart2(obstacles obstacles, pos [2]int, rows, cols int) int {
 	// 		loopCount += 1
 	// 	}
 	// }
-	fmt.Println("in pos", len(visits))
-	return newObsCount
+	return newObsCount, newObstacles
 
 }
 
@@ -246,6 +280,26 @@ func Solve() {
 
 	res := solvePart1(gridObstacles, currPos, rows, cols)
 	utils.PrintSolution(6, 1, res)
-	res = solvePart2(gridObstacles, currPos, rows, cols)
+	res, _ = solvePart2(gridObstacles, currPos, rows, cols)
+	// for _, obs := range newObs {
+	// 	lines[obs[0]] = lines[obs[0]][:obs[1]] + "O" + lines[obs[0]][obs[1]+1:]
+	// }
+	// for _, line := range lines {
+	// 	fmt.Println(line)
+
+	// }
 	utils.PrintSolution(6, 2, res)
 }
+
+/*
+....#.....
+.........#
+..........
+..#.......
+.......#..
+..........
+.#.O^.....
+......OO#.
+#O.O......
+......#O..
+*/
