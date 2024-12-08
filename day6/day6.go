@@ -41,30 +41,6 @@ func solvePart1(obstacles obstacles, pos [2]int, rows, cols int) int {
 	return len(visits)
 }
 
-/*
-....#.....
-....xxxxx#
-....x...x.
-..#.x...x.
-..xxxxx#x.
-..x.x.x.x.
-.#xxxxxxx.
-.xxxxxxx#.
-#xxxxxxx..
-......#x..
-
-....#.....
-....01111#
-....0...2.
-..#.0...2.
-..01011#2.
-..0.0.2.2.
-.#3o^3332.
-.01111oo#.
-#o3o3322..
-......#o..
-*/
-
 func isLoop(obstacles obstacles, newObstacle [2]int, startPos [2]int, rows, cols int) bool {
 	MAXSTEPS := rows * cols
 	steps := 0
@@ -194,25 +170,5 @@ func Solve() {
 			fmt.Println(obs)
 		}
 	}
-	// for _, obs := range newObs {
-	// 	lines[obs[0]] = lines[obs[0]][:obs[1]] + "O" + lines[obs[0]][obs[1]+1:]
-	// }
-	// for _, line := range lines {
-	// 	fmt.Println(line)
-
-	// }
 	utils.PrintSolution(6, 2, res)
 }
-
-/*
-....#.....
-.........#
-..........
-..#.......
-.......#..
-..........
-.#.O^.....
-......OO#.
-#O.O......
-......#O..
-*/

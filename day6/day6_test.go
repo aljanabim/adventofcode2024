@@ -43,7 +43,6 @@ func TestSolvePart2_first(t *testing.T) {
 	lines := strings.Split(linesTxt, "\n")
 	rows, cols, gridObstacles, currPos := buildGrid(lines)
 
-	fmt.Println(gridObstacles)
 	got, newObs := solvePart2(gridObstacles, currPos, rows, cols)
 	for obs, _ := range newObs {
 		if obs[0] >= 0 && obs[0] < len(lines) {
@@ -101,7 +100,6 @@ func TestSolvePart2_second(t *testing.T) {
 	rows, cols, gridObstacles, currPos := buildGrid(lines)
 
 	got, newObs := solvePart2(gridObstacles, currPos, rows, cols)
-	fmt.Println(newObs)
 	for obs, _ := range newObs {
 		if obs[0] >= 0 && obs[0] < len(lines) {
 			lines[obs[0]] = lines[obs[0]][:obs[1]] + "O" + lines[obs[0]][obs[1]+1:]
