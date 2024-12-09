@@ -69,7 +69,6 @@ func solvePart2(lines []string) int {
 						antinodes[a2]++
 					}
 				}
-				// fmt.Println("combo", p1, "with", p2, "repeat", repeats)
 			}
 		}
 	}
