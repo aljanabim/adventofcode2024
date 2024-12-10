@@ -10,5 +10,14 @@ func TestPart1(t *testing.T) {
 		t.Errorf("solvePart1 got %d want %d", got, want)
 
 	}
+}
 
+func TestPart2(t *testing.T) {
+	input := "2333133121414131402"
+	got := solvePart2(input)
+	want := 2858
+	if got != want {
+		t.Errorf("solvePart1 got %d want %d", got, want)
+
+	}
 }
