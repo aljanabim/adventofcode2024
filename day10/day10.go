@@ -18,19 +18,20 @@ func traverse(n *Node) bool {
 	if n.height == 0 {
 		return true
 	}
+	foundPath := false
 	if n.up != nil && !n.up.visited {
-		return traverse(n.up)
+		foundPath = foundPath || traverse(n.up)
 	}
 	if n.down != nil && !n.down.visited {
-		return traverse(n.down)
+		foundPath = foundPath || traverse(n.down)
 	}
 	if n.left != nil && !n.left.visited {
-		return traverse(n.left)
+		foundPath = foundPath || traverse(n.left)
 	}
 	if n.right != nil && !n.right.visited {
-		return traverse(n.right)
+		foundPath = foundPath || traverse(n.right)
 	}
-	return false
+	return foundPath
 }
 
 func resetVisited(n *Node) {

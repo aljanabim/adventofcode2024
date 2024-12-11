@@ -58,16 +58,46 @@ func TestPart1(t *testing.T) {
 	   987....
 	*/
 
-	input = `..90...
-...1...
-...2...
+	input = `..90..9
+...1.98
+...2..7
 6543456
-76.....
-8......
-9......`
+765.987
+876....
+987....`
 	lines = strings.Split(input, "\n")
 	got = solvePart1(lines)
-	want = 1
+	want = 4
+	if want != got {
+		t.Errorf("solvePart1 got %d %d want", got, want)
+	}
+
+	input = `10..9..
+2...8..
+3...7..
+4567654
+...8..3
+...9..2
+.....01`
+	lines = strings.Split(input, "\n")
+	got = solvePart1(lines)
+	want = 2
+	if want != got {
+		t.Errorf("solvePart1 got %d %d want", got, want)
+	}
+
+	input = `89010123
+78121874
+87430965
+96549874
+45678903
+32019012
+01329801
+10456732`
+
+	lines = strings.Split(input, "\n")
+	got = solvePart1(lines)
+	want = 2
 	if want != got {
 		t.Errorf("solvePart1 got %d %d want", got, want)
 	}
