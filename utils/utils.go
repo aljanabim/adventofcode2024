@@ -2,8 +2,10 @@ package utils
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"strings"
+	"time"
 )
 
 func PrintSolution[E any](day, part int, res E) {
@@ -32,4 +34,12 @@ func Abs(x int) int {
 		return -x
 	}
 	return x
+}
+
+func Track(msg string) (string, time.Time) {
+	return msg, time.Now()
+}
+
+func Duration(msg string, start time.Time) {
+	log.Printf("%v: %v\n", msg, time.Since(start))
 }
