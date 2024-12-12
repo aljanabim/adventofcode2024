@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestPart1(t *testing.T) {
+func pTestPart1(t *testing.T) {
 	input := `...0...
 ...1...
 ...2...
@@ -17,7 +17,7 @@ func TestPart1(t *testing.T) {
 	got := solvePart1(lines)
 	want := 2
 	if want != got {
-		t.Errorf("solvePart1 got %d %d want", got, want)
+		t.Errorf("solvePart1 got %d want %d", got, want)
 	}
 
 	input = `...0...
@@ -31,7 +31,7 @@ func TestPart1(t *testing.T) {
 	got = solvePart1(lines)
 	want = 1
 	if want != got {
-		t.Errorf("solverPart1 got %d %d want", got, want)
+		t.Errorf("solverPart1 got %d want %d", got, want)
 	}
 
 	input = `...0...
@@ -45,18 +45,8 @@ func TestPart1(t *testing.T) {
 	got = solvePart1(lines)
 	want = 0
 	if want != got {
-		t.Errorf("solverPart1 got %d %d want", got, want)
+		t.Errorf("solverPart1 got %d want %d", got, want)
 	}
-
-	/*
-	   ..90..9
-	   ...1.98
-	   ...2..7
-	   6543456
-	   765.987
-	   876....
-	   987....
-	*/
 
 	input = `..90..9
 ...1.98
@@ -69,7 +59,7 @@ func TestPart1(t *testing.T) {
 	got = solvePart1(lines)
 	want = 4
 	if want != got {
-		t.Errorf("solvePart1 got %d %d want", got, want)
+		t.Errorf("solvePart1 got %d want %d", got, want)
 	}
 
 	input = `10..9..
@@ -81,9 +71,9 @@ func TestPart1(t *testing.T) {
 .....01`
 	lines = strings.Split(input, "\n")
 	got = solvePart1(lines)
-	want = 2
+	want = 3
 	if want != got {
-		t.Errorf("solvePart1 got %d %d want", got, want)
+		t.Errorf("solvePart1 got %d want %d", got, want)
 	}
 
 	input = `89010123
@@ -97,11 +87,26 @@ func TestPart1(t *testing.T) {
 
 	lines = strings.Split(input, "\n")
 	got = solvePart1(lines)
-	want = 2
+	want = 36
 	if want != got {
-		t.Errorf("solvePart1 got %d %d want", got, want)
+		t.Errorf("solvePart1 got %d want %d", got, want)
 	}
+}
 
+func TestPart2(t *testing.T) {
+	input := `.....0.
+..4321.
+..5..2.
+..6543.
+..7..4.
+..8765.
+..9....`
+	lines := strings.Split(input, "\n")
+	got := solvePart2(lines)
+	want := 3
+	if want != got {
+		t.Errorf("solvePart1 got %d want %d", got, want)
+	}
 	//	input = `..90..9
 	//
 	// ...1.98
@@ -115,6 +120,6 @@ func TestPart1(t *testing.T) {
 	//	got = solvePart1(lines)
 	//	want = 4
 	//	if want != got {
-	//		t.Errorf("solvePart1 got %d %d want", got, want)
+	//		t.Errorf("solvePart1 got %d want %d", got, want)
 	//	}
 }

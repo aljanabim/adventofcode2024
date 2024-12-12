@@ -1,6 +1,8 @@
 package day10
 
 import (
+	"fmt"
+
 	"github.com/aljanabim/adventofcode2024/utils"
 )
 
@@ -13,31 +15,40 @@ type Node struct {
 	right   *Node
 }
 
-func traverse(n *Node) bool {
+func traverse(n *Node, score int, startNode *Node) int {
+	fmt.Println(n, score)
 	n.visited = true
-	if n.height == 0 {
-		return true
+	if n.height == 9 {
+		if startNode != nil {
+			fmt.Println("resetting from", startNode)
+			resetVisited(startNode)
+		}
+		return score + 1
 	}
-	foundPath := false
+
+	score1, score2, score3, score4 := 0, 0, 0, 0
 	if n.up != nil && !n.up.visited {
-		foundPath = foundPath || traverse(n.up)
+		score1 = traverse(n.up, score, startNode)
+	}
+	if n.height == 5 && n.down != nil {
+		// todo make sure to reset everything
+		fmt.Println("curr h", n.height, "going down with", n.down, "to height", n.down.height, n.down.visited)
 	}
 	if n.down != nil && !n.down.visited {
-		foundPath = foundPath || traverse(n.down)
+		score2 = traverse(n.down, score, startNode)
 	}
 	if n.left != nil && !n.left.visited {
-		foundPath = foundPath || traverse(n.left)
+		score3 = traverse(n.left, score, startNode)
 	}
 	if n.right != nil && !n.right.visited {
-		foundPath = foundPath || traverse(n.right)
+		score4 = traverse(n.right, score, startNode)
 	}
-	return foundPath
+	return score1 + score2 + score3 + score4
 }
 
 func resetVisited(n *Node) {
-	if n.visited {
-		n.visited = false
-	}
+	n.visited = false
+
 	if n.up != nil && n.up.visited {
 		resetVisited(n.up)
 	}
@@ -53,10 +64,8 @@ func resetVisited(n *Node) {
 
 }
 
-func solvePart1(lines []string) int {
+func createGrid(lines []string) [][]*Node {
 	grid := make([][]*Node, len(lines))
-	peakNodes := []*Node{}
-
 	for row, line := range lines {
 		r := []*Node{}
 		for _, c := range line {
@@ -64,61 +73,78 @@ func solvePart1(lines []string) int {
 		}
 		grid[row] = r
 	}
-	// Populate grid
+	return grid
+}
+
+func updateGrid(grid [][]*Node) []*Node {
+	trailStart := []*Node{}
 	for i, row := range grid {
 		for j, node := range row {
 			if j > 0 { // left neighbor
 				leftNode := grid[i][j-1]
-				if utils.Abs(leftNode.height-node.height) == 1 {
+				if leftNode.height-node.height == 1 {
 					node.left = leftNode
-					leftNode.right = node
 				}
 			}
 			if j < len(row)-1 { // right neighbor
 				rightNode := grid[i][j+1]
-				if utils.Abs(rightNode.height-node.height) == 1 {
+				if rightNode.height-node.height == 1 {
 					node.right = rightNode
-					rightNode.left = node
 				}
 			}
 
 			if i > 0 { // up neighbor
 				upNode := grid[i-1][j]
-				if utils.Abs(upNode.height-node.height) == 1 {
+				if upNode.height-node.height == 1 {
 					node.up = upNode
-					upNode.down = node
 				}
 			}
 			if i < len(grid)-1 { // down neighbor
 				downNode := grid[i+1][j]
-				if utils.Abs(downNode.height-node.height) == 1 {
+				if downNode.height-node.height == 1 {
 					node.down = downNode
-					downNode.up = node
 				}
 			}
 
-			if node.height == 9 {
-				peakNodes = append(peakNodes, node)
+			if node.height == 0 {
+				trailStart = append(trailStart, node)
 			}
 		}
 	}
-	/*
-	   ..90..9
-	   ...1.98
-	   ...2..7
-	   6543456
-	   765.987
-	   876....
-	   987....
-	*/
-
+	return trailStart
+}
+func solvePart1(lines []string) int {
+	grid := createGrid(lines)
+	trailHeads := updateGrid(grid)
 	score := 0
-	for _, n := range peakNodes {
-		reachable := traverse(n)
+	for _, n := range trailHeads {
+		headScore := traverse(n, 0, nil)
 		resetVisited(n)
-		if reachable {
-			score++
-		}
+		score += headScore
 	}
 	return score
+
+}
+func solvePart2(lines []string) int {
+	grid := createGrid(lines)
+	trailHeads := updateGrid(grid)
+	score := 0
+	for _, n := range trailHeads {
+		headScore := traverse(n, 0, n)
+		resetVisited(n)
+		score += headScore
+	}
+	return score
+}
+
+func Solve() {
+	lines, err := utils.ReadLines("day10/input")
+	if err != nil {
+		panic(err)
+	}
+	res := solvePart1(lines)
+	utils.PrintSolution(10, 1, res)
+	res = solvePart2(lines)
+	utils.PrintSolution(10, 2, res)
+
 }
