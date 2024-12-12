@@ -16,11 +16,9 @@ type Node struct {
 }
 
 func traverse(n *Node, score int, startNode *Node) int {
-	fmt.Println(n, score)
 	n.visited = true
 	if n.height == 9 {
 		if startNode != nil {
-			fmt.Println("resetting from", startNode)
 			resetVisited(startNode)
 		}
 		return score + 1
@@ -29,10 +27,6 @@ func traverse(n *Node, score int, startNode *Node) int {
 	score1, score2, score3, score4 := 0, 0, 0, 0
 	if n.up != nil && !n.up.visited {
 		score1 = traverse(n.up, score, startNode)
-	}
-	if n.height == 5 && n.down != nil {
-		// todo make sure to reset everything
-		fmt.Println("curr h", n.height, "going down with", n.down, "to height", n.down.height, n.down.visited)
 	}
 	if n.down != nil && !n.down.visited {
 		score2 = traverse(n.down, score, startNode)
@@ -49,16 +43,16 @@ func traverse(n *Node, score int, startNode *Node) int {
 func resetVisited(n *Node) {
 	n.visited = false
 
-	if n.up != nil && n.up.visited {
+	if n.up != nil && n.up != n {
 		resetVisited(n.up)
 	}
-	if n.down != nil && n.down.visited {
+	if n.down != nil && n.down != n {
 		resetVisited(n.down)
 	}
-	if n.left != nil && n.left.visited {
+	if n.left != nil && n.left != n {
 		resetVisited(n.left)
 	}
-	if n.right != nil && n.right.visited {
+	if n.right != nil && n.right != n {
 		resetVisited(n.right)
 	}
 
