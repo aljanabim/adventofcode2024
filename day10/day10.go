@@ -1,8 +1,6 @@
 package day10
 
 import (
-	"fmt"
-
 	"github.com/aljanabim/adventofcode2024/utils"
 )
 
@@ -107,7 +105,9 @@ func updateGrid(grid [][]*Node) []*Node {
 	}
 	return trailStart
 }
+
 func solvePart1(lines []string) int {
+	defer utils.Duration(utils.Track("Part 1"))
 	grid := createGrid(lines)
 	trailHeads := updateGrid(grid)
 	score := 0
@@ -119,7 +119,9 @@ func solvePart1(lines []string) int {
 	return score
 
 }
+
 func solvePart2(lines []string) int {
+	defer utils.Duration(utils.Track("Part 2"))
 	grid := createGrid(lines)
 	trailHeads := updateGrid(grid)
 	score := 0
