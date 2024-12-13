@@ -2,7 +2,6 @@ package day11
 
 import (
 	"os"
-	"slices"
 	"strconv"
 	"strings"
 
@@ -10,15 +9,8 @@ import (
 )
 
 func blink(stones []string) []string {
-	skipNext := false
-	i := 0
-	for i < len(stones) {
-		stone := stones[i]
-		if skipNext {
-			i++
-			skipNext = false
-			continue
-		}
+	// skipNext := false
+	for i, stone := range stones {
 		if stone == "0" {
 			stones[i] = "1"
 		} else if len(stone)%2 == 0 {
@@ -28,8 +20,7 @@ func blink(stones []string) []string {
 				panic(err)
 			}
 			rightNumStr := strconv.Itoa(int(rightNum))
-			stones = slices.Insert(stones, i+1, rightNumStr)
-			skipNext = true
+			stones = append(stones, rightNumStr)
 		} else if (len(stone)+1)%2 == 0 {
 			stoneNum, err := strconv.ParseInt(stone, 10, 64)
 			if err != nil {
@@ -37,12 +28,19 @@ func blink(stones []string) []string {
 			}
 			stones[i] = strconv.Itoa(int(stoneNum * 2024))
 		}
-		i++
 	}
 	return stones
 }
 
 func solvePart1(stones []string, nBlinks int) int {
+	for range nBlinks {
+		stones = blink(stones)
+	}
+	return len(stones)
+}
+
+func solvePart2(stones []string, nBlinks int) int {
+	// cache := map[string][]string{}
 	for range nBlinks {
 		stones = blink(stones)
 	}
@@ -60,3 +58,25 @@ func Solve() {
 	res := solvePart1(input, 25)
 	utils.PrintSolution(11, 1, res)
 }
+
+// func blink(stone string) []string {
+// 	stones := []string{}
+// 	if stone == "0" {
+// 		stones = append(stones, "1")
+// 	} else if len(stone)%2 == 0 {
+// 		stones = append(stones, stone[:len(stone)/2])
+// 		rightNum, err := strconv.ParseInt(stone[len(stone)/2:], 10, 64)
+// 		if err != nil {
+// 			panic(err)
+// 		}
+// 		rightNumStr := strconv.Itoa(int(rightNum))
+// 		stones = append(stones, rightNumStr)
+// 	} else if (len(stone)+1)%2 == 0 {
+// 		stoneNum, err := strconv.ParseInt(stone, 10, 64)
+// 		if err != nil {
+// 			panic(err)
+// 		}
+// 		stones = append(stones, strconv.Itoa(int(stoneNum*2024)))
+// 	}
+// 	return stones
+// }
