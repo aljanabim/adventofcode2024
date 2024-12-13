@@ -1,6 +1,9 @@
 package day11
 
-import "testing"
+import (
+	"reflect"
+	"testing"
+)
 
 func TestPart1(t *testing.T) {
 	input := []string{"125", "17"}
@@ -23,4 +26,20 @@ func TestPart1(t *testing.T) {
 	if got != want {
 		t.Errorf("solvePart1 got %d want %d", got, want)
 	}
+}
+
+func TestBlink(t *testing.T) {
+	got := []string{"0"}
+	for range 4 {
+		got = blink(got)
+	}
+	want := []string{"2", "2", "0", "4"}
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("blink got %v want %v", got, want)
+	}
+}
+
+func TestPart2(t *testing.T) {
+	input := []string{"0"}
+	solvePart2(input, 5)
 }
