@@ -45,40 +45,29 @@ type Record struct {
 }
 type Cache map[Record]int
 
-var cache = make(Cache)
-
-func explore(record Record) {
-	if _, ok := cache[record]; ok {
-		// fmt.Println("Found cached", record)
-		return
+func explore(stones []string, blinks int, cache Cache) int {
+	if blinks == 0 {
+		return len(stones)
 	}
-	// fmt.Println("Exploring", record)
-	res := []string{record.string}
-	for nBlink := range record.int {
-		res = blink(res)
-		cache[Record{record.string, nBlink + 1}] = len(res)
-		// fmt.Println("Caching (", record.string, nBlink+1, "): ", len(res))
-		for _, stone := range res {
-			if record.int-nBlink > 1 {
-				newRecord := Record{stone, record.int - nBlink - 1}
-				explore(newRecord)
-			}
+	count := 0
+	for _, stone := range stones {
+		if val, ok := cache[Record{stone, blinks}]; ok {
+			count += val
+			continue
 		}
+		subTot := explore(blink([]string{stone}), blinks-1, cache)
+		cache[Record{stone, blinks}] = subTot
+		count += subTot
 	}
+	return count
 }
 
 func solvePart2(stones []string, blinks int) int {
 	defer utils.Duration(utils.Track("Part2"))
 
-	for _, stone := range stones {
-		record := Record{stone, blinks}
-		// fmt.Println("Part2 stone", stone)
-		explore(record)
-	}
+	var cache = make(Cache)
 	tot := 0
-	for _, stone := range stones {
-		tot += cache[Record{stone, blinks}]
-	}
+	tot += explore(stones, blinks, cache)
 	return tot
 }
 
@@ -90,9 +79,9 @@ func Solve() {
 
 	input := strings.Split(strings.TrimSpace(string(file)), " ")
 
-	res := solvePart1(input, 20)
+	res := solvePart1(input, 30)
 	utils.PrintSolution(11, 1, res)
 	input = strings.Split(strings.TrimSpace(string(file)), " ")
-	res = solvePart2(input, 20)
+	res = solvePart2(input, 75)
 	utils.PrintSolution(11, 2, res)
 }
