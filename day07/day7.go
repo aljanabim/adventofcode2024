@@ -1,4 +1,4 @@
-package day7
+package day07
 
 import (
 	"fmt"
@@ -136,7 +136,7 @@ func solvePart2(lines []string) int {
 }
 
 func Solve() {
-	lines, err := utils.ReadLines("day7/input")
+	lines, err := utils.ReadLines("day07/input")
 	if err != nil {
 		panic(err)
 	}

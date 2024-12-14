@@ -1,19 +1,15 @@
 package main
 
-import (
-	"github.com/aljanabim/adventofcode2024/day11"
-)
-
 func main() {
-	// day1.Solve()
-	// day2.Solve()
-	// day3.Solve()
-	// day4.Solve()
-	// day5.Solve()
-	// day6.Solve()
-	// day7.Solve()
-	// day8.Solve()
-	// day9.Solve()
+	// day01.Solve()
+	// day02.Solve()
+	// day03.Solve()
+	// day04.Solve()
+	// day05.Solve()
+	// day06.Solve()
+	// day07.Solve()
+	// day08.Solve()
+	// day09.Solve()
 	// day10.Solve()
-	day11.Solve()
+	// day11.Solve()
 }

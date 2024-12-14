@@ -1,4 +1,4 @@
-package day2
+package day02
 
 import (
 	"math"
@@ -45,7 +45,7 @@ func checkReportWithDampener(report []int) bool {
 }
 
 func readReports() [][]int {
-	dataRaw, err := os.ReadFile("day2/input")
+	dataRaw, err := os.ReadFile("day02/input")
 	if err != nil {
 		panic(err)
 	}

@@ -1,4 +1,4 @@
-package day6
+package day06
 
 import (
 	"fmt"
@@ -155,7 +155,7 @@ func buildGrid(lines []string) (int, int, obstacles, [2]int) {
 }
 
 func Solve() {
-	lines, err := utils.ReadLines("day6/input")
+	lines, err := utils.ReadLines("day06/input")
 	if err != nil {
 		panic(err)
 	}

@@ -1,4 +1,4 @@
-package day3
+package day03
 
 import (
 	"os"
@@ -23,7 +23,7 @@ func parseMulti(multi string) int64 {
 }
 
 func solvePart1() int64 {
-	dataRaw, err := os.ReadFile("day3/input")
+	dataRaw, err := os.ReadFile("day03/input")
 	if err != nil {
 		panic(err)
 	}
@@ -39,7 +39,7 @@ func solvePart1() int64 {
 }
 
 func solvePart2() int64 {
-	dataRaw, err := os.ReadFile("day3/input")
+	dataRaw, err := os.ReadFile("day03/input")
 	if err != nil {
 		panic(err)
 	}

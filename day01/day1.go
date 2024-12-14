@@ -1,4 +1,4 @@
-package day1
+package day01
 
 import (
 	"math"
@@ -11,7 +11,7 @@ import (
 )
 
 func getSortedLists() ([]int, []int) {
-	dataRaw, err := os.ReadFile("day1/input")
+	dataRaw, err := os.ReadFile("day01/input")
 	dataStr := strings.Split(string(dataRaw), "\n")
 	if err != nil {
 		panic(err)
