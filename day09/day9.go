@@ -1,4 +1,4 @@
-package day9
+package day09
 
 import (
 	"github.com/aljanabim/adventofcode2024/utils"
@@ -101,7 +101,7 @@ func solvePart2(line string) int {
 }
 
 func Solve() {
-	input, err := utils.ReadLines("day9/input")
+	input, err := utils.ReadLines("day09/input")
 	if err != nil {
 		panic(err)
 	}

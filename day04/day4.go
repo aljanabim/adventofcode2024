@@ -1,4 +1,4 @@
-package day4
+package day04
 
 import (
 	"fmt"
@@ -61,7 +61,7 @@ func solvePart1() int {
 		"br": {1, 1},
 	}
 
-	lines, err := utils.ReadLines("day4/input")
+	lines, err := utils.ReadLines("day04/input")
 	if err != nil {
 		panic(err)
 	}
@@ -93,7 +93,7 @@ func solvePart1() int {
 }
 
 func solvePart2() int {
-	lines, err := utils.ReadLines("day4/input")
+	lines, err := utils.ReadLines("day04/input")
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -1,4 +1,4 @@
-package day5
+package day05
 
 import (
 	"fmt"
@@ -80,7 +80,7 @@ func solveBothParts(pageRules, updatedPages string) (int, int) {
 }
 
 func Solve() {
-	fileRaw, err := os.ReadFile("day5/input")
+	fileRaw, err := os.ReadFile("day05/input")
 	if err != nil {
 		panic(err)
 	}
