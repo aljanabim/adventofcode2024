@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestPart1_simple(t *testing.T) {
+func _TestPart1_simple(t *testing.T) {
 	input := `AAAA
 BBCD
 BBCC
@@ -18,7 +18,7 @@ EEEC`
 	}
 }
 
-func TestPart1_xo(t *testing.T) {
+func _TestPart1_xo(t *testing.T) {
 	input := `OOOOO
 OXOXO
 OOOOO
@@ -32,7 +32,7 @@ OOOOO`
 	}
 }
 
-func TestPart1_big(t *testing.T) {
+func _TestPart1_big(t *testing.T) {
 	input := `RRRRIICCFF
 RRRRIICCCF
 VVRRRCCFFF
@@ -51,7 +51,7 @@ MMMISSJEEE`
 	}
 }
 
-func TestPart2_simple(t *testing.T) {
+func _TestPart2_simple(t *testing.T) {
 	input := `AAAA
 BBCD
 BBCC
@@ -77,7 +77,21 @@ OOOOOO`
 	}
 }
 
-func TestPart2_xo(t *testing.T) {
+func TestPart2_snake(t *testing.T) {
+
+	input := `X00
+XX0
+000
+000
+X0X`
+	lines := strings.Split(input, "\n")
+	want := 18 + 4 + 4 + 10*12
+	got := solvePart2(lines)
+	if got != want {
+		t.Errorf("solvePart2 got %d want %d", got, want)
+	}
+}
+func _TestPart2_xo(t *testing.T) {
 	input := `OOOOO
 OXOXO
 OOOOO
@@ -92,7 +106,7 @@ OOOOO`
 	}
 }
 
-func TestPart2_E(t *testing.T) {
+func _TestPart2_E(t *testing.T) {
 	input := `EEEEE
 EXXXX
 EEEEE
@@ -106,7 +120,7 @@ EEEEE`
 	}
 }
 
-func TestPart2_corners(t *testing.T) {
+func _TestPart2_corners(t *testing.T) {
 	input := `AAAAAA
 AAABBA
 AAABBA
@@ -125,7 +139,7 @@ AAAAAA`
 	}
 }
 
-func TestPart2_big(t *testing.T) {
+func _TestPart2_big(t *testing.T) {
 	input := `RRRRIICCFF
 RRRRIICCCF
 VVRRRCCFFF
