@@ -110,7 +110,7 @@ func visitNeighbors(name byte, row, col int, lines *[]string, cache Cache) (int,
 
 type Cache map[[2]int]bool
 
-func fenceCost(regions []Region) int {
+func computeFenceCost(regions []Region) int {
 	cost := 0
 	for _, region := range regions {
 		cost += region.area * region.perimeter
@@ -133,7 +133,7 @@ func solvePart1(lines []string) int {
 		}
 	}
 
-	return fenceCost(regions)
+	return computeFenceCost(regions)
 }
 
 func Solve() {
