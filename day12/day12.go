@@ -1,8 +1,6 @@
 package day12
 
 import (
-	"fmt"
-
 	"github.com/aljanabim/adventofcode2024/utils"
 )
 
@@ -151,115 +149,44 @@ ABBAAA
 AAAAAA
 */
 
-func visitNeighbors2(name byte, row, col, sourceRow, sourceCol int, lines *[]string, cache Cache, checkedRows, checkedCols map[int]bool, countPerimeter sides) (int, int) {
+func buildRegionGrid(grid *[][]bool, name byte, row, col int, lines *[]string, cache Cache) int {
 	cache[[2]int{row, col}] = true
-	checkedRows[row] = row == sourceRow
-	checkedCols[col] = col == sourceCol
-	top, right, bottom, left := computePerimeter(name, row, col, lines)
-
-	// Below is logic to cover situations where we should override the checkedRows and checkedCols conditions
-
-	// check if solo corner on the left (the only way to enter such an edge is if visited from right so count top and count bottom
-	// should be covered by the logic in the recursive calls)
-	if itob(top) && itob(left) && itob(bottom) {
-		// countPerimeter.top = true
-		countPerimeter.left = true
-		// countPerimeter.bottom = true
-	}
-	// check if solo corner on the right (the only way to enter such an edge is if visited from left so count top and count bottom
-	// should be covered by the logic in the recursive calls)
-	if itob(top) && itob(right) && itob(bottom) {
-		// countPerimeter.top = true
-		countPerimeter.right = true
-		// countPerimeter.bottom = true
-	}
-	// check if solo corner on the top (the only way to enter such an edge is if visited from bottom so count right and count right
-	// should be covered by the logic in the recursive calls)
-	if itob(left) && itob(top) && itob(right) {
-		countPerimeter.top = true
-		// countPerimeter.right = true
-		// countPerimeter.left = true
-	}
-	// check if solo corner on the bottom (the only way to enter such an edge is if visited from top so count right and count right
-	// should be covered by the logic in the recursive calls)
-	if itob(left) && itob(bottom) && itob(right) {
-		// countPerimeter.right = true
-		// countPerimeter.left = true
-		countPerimeter.bottom = true
-	}
-
-	// if itob(top) && itob(left) { // check top left corner (no need to check top right)
-	// 	countPerimeter.top = true
-	// 	countPerimeter.left = true
-	// }
-	// if itob(bottom) && itob(right) { // check bottom right (no need to check top left given order of visiting neighbors [top, right, bottom, left])
-	// countPerimeter.right = true
-	// countPerimeter.bottom = true
-	// }
-
-	/*
-	   RRRRIICCFF
-	   RRRRIICCCF
-	   VVRRRCCFFF
-	   VVRCCCJFFF
-	   VVVVCJJCFE
-	   VVIVCCJJEE
-	   VVIIICJJEE
-	   MIIIIIJJEE
-	   MIIISIJEEE
-	   MMMISSJEEE
-	*/
-
-	perimeter := top*btoi(countPerimeter.top) + right*btoi(countPerimeter.right) + bottom*btoi(countPerimeter.bottom) + left*btoi(countPerimeter.left)
-	if name == 'C' || name == 'F' {
-		fmt.Print("visiting \"", string(name), "\" at ", row, " ", col, " perim ", perimeter, "\t==\t")
-		fmt.Println(top, countPerimeter.top, right, countPerimeter.right, bottom, countPerimeter.bottom, left, countPerimeter.left)
-	}
+	(*grid)[row][col] = true
 	area := 1
 
 	// check above
 	if row > 0 && (*lines)[row-1][col] == name {
 		if visited := cache[[2]int{row - 1, col}]; !visited {
-			newCountPerimeter := sides{top: !checkedRows[row-1], right: !itob(right), bottom: false, left: !itob(left)}
-			a, p := visitNeighbors2(name, row-1, col, row, col, lines, cache, checkedRows, checkedCols, newCountPerimeter)
+			a := buildRegionGrid(grid, name, row-1, col, lines, cache)
 			area += a
-			perimeter += p
-		}
-	}
-
-	// check right
-	if col < len((*lines)[0])-1 && (*lines)[row][col+1] == name {
-		if visited := cache[[2]int{row, col + 1}]; !visited {
-			newCountPerimeter := sides{top: !itob(top), right: !checkedCols[col+1], bottom: !itob(bottom), left: false}
-			// newCountPerimeter := sides{}
-			a, p := visitNeighbors2(name, row, col+1, row, col, lines, cache, checkedRows, checkedCols, newCountPerimeter)
-			area += a
-			perimeter += p
 		}
 	}
 
 	// check below
 	if row < len(*lines)-1 && (*lines)[row+1][col] == name {
 		if visited := cache[[2]int{row + 1, col}]; !visited {
-			newCountPerimeter := sides{top: false, right: !itob(right), bottom: !checkedRows[row+1], left: !itob(left)}
-			a, p := visitNeighbors2(name, row+1, col, row, col, lines, cache, checkedRows, checkedCols, newCountPerimeter)
+			a := buildRegionGrid(grid, name, row+1, col, lines, cache)
 			area += a
-			perimeter += p
 		}
 	}
 
 	// check left
 	if col > 0 && (*lines)[row][col-1] == name {
 		if visited := cache[[2]int{row, col - 1}]; !visited {
-			newCountPerimeter := sides{top: !itob(top), right: false, bottom: !itob(bottom), left: !checkedCols[col-1]}
-			// newCountPerimeter := sides{}
-			a, p := visitNeighbors2(name, row, col-1, row, col, lines, cache, checkedRows, checkedCols, newCountPerimeter)
+			a := buildRegionGrid(grid, name, row, col-1, lines, cache)
 			area += a
-			perimeter += p
 		}
 	}
 
-	return area, perimeter
+	// check right
+	if col < len((*lines)[0])-1 && (*lines)[row][col+1] == name {
+		if visited := cache[[2]int{row, col + 1}]; !visited {
+			a := buildRegionGrid(grid, name, row, col+1, lines, cache)
+			area += a
+		}
+	}
+
+	return area
 }
 
 type Cache map[[2]int]bool
@@ -268,7 +195,7 @@ func computeFenceCost(regions []Region) int {
 	cost := 0
 	for _, region := range regions {
 		cost += region.area * region.perimeter
-		fmt.Println(region.area, "x", region.perimeter, "=", region.area*region.perimeter)
+		// fmt.Println(region.area, "x", region.perimeter, "=", region.area*region.perimeter)
 	}
 	return cost
 }
@@ -289,6 +216,124 @@ func solvePart1(lines []string) int {
 	return computeFenceCost(regions)
 }
 
+func resetGrid(rows, cols int) [][]bool {
+	grid := make([][]bool, rows)
+	for row := range rows {
+		grid[row] = make([]bool, cols)
+	}
+	return grid
+}
+
+func countSides(grid *[][]bool) int {
+	count := 0
+	// for row := range len(*grid) {
+	// for col := range len((*grid)[row]) {
+	for row, line := range *grid {
+		horzSides := 0
+		vertSides := 0
+		for col, in := range line {
+			// top & bottom sides
+			if row == 0 || row == len((*grid))-1 {
+				if col == 0 && in {
+					horzSides++
+				}
+				if col > 0 && in && !line[col-1] {
+					horzSides++
+				}
+			}
+			// left & right sides
+			if col == 0 || col == len(line)-1 {
+				if row == 0 && in {
+					vertSides++
+				}
+				if row > 0 && in && !(*grid)[row-1][col] {
+					vertSides++
+				}
+			}
+
+			// horizontal sides on left line
+			if col == 0 && row > 0 {
+				if in != (*grid)[row-1][col] {
+					horzSides++
+				}
+			}
+			// vertical sides on top line
+			if row == 0 && col > 0 {
+				if in != (*grid)[row][col-1] {
+					vertSides++
+				}
+			}
+
+			// inner parts
+			if 0 < row && 0 < col {
+				upLeftIn := (*grid)[row-1][col-1]
+				upIn := (*grid)[row-1][col]
+				leftIn := (*grid)[row][col-1]
+
+				// INNER POINT LINES
+				/* horizontal line due to inner point
+				OX
+				OO<-
+				*/
+				if in && upLeftIn && leftIn && !upIn {
+					horzSides++
+				}
+				/* horizontal & vertical lines to inner point
+				.X
+				XO<-
+				*/
+				if in && !upIn && !leftIn {
+					horzSides++
+					vertSides++
+				}
+				/* vertical line due to inner point
+				OO
+				XO<-
+				*/
+				if in && upLeftIn && !leftIn && upIn {
+					vertSides++
+				}
+
+				// OUTER POINT LINES
+				/* horizontal line due to outer point
+				XO
+				.X<-
+				*/
+				if !in && upIn && !upLeftIn {
+					horzSides++
+				}
+				/* horizontal lines due to outer point
+				OO
+				OX<-
+				*/
+				if !in && upIn && upLeftIn && leftIn {
+					horzSides++
+				}
+				/* vertical lines due to outer point
+				XX
+				OX<-
+				*/
+				if !in && !upIn && !upLeftIn && leftIn {
+					vertSides++
+				}
+				/* vertical lines due to outer point
+				.O
+				OX<-
+				*/
+				if !in && upIn && leftIn {
+					vertSides++
+				}
+			}
+		}
+		// fmt.Println("Sides", line, "horz", horzSides, "vert", vertSides)
+		count += horzSides + vertSides
+	}
+	// }
+	// fmt.Println()
+	// }
+	return count
+}
+
 func solvePart2(lines []string) int {
 	visitCache := make(Cache)
 	regions := []Region{}
@@ -296,9 +341,10 @@ func solvePart2(lines []string) int {
 	for row, line := range lines {
 		for col, name := range line {
 			if visited := visitCache[[2]int{row, col}]; !visited {
-				checkedRows := map[int]bool{}
-				checkedCols := map[int]bool{}
-				area, perimeter := visitNeighbors2(byte(name), row, col, row, col, &lines, visitCache, checkedRows, checkedCols, sides{true, true, true, true})
+				grid := resetGrid(len(lines), len(line))
+				area := buildRegionGrid(&grid, byte(name), row, col, &lines, visitCache)
+				perimeter := countSides(&grid)
+				// fmt.Println("Area", area, "perimeter", perimeter)
 				regions = append(regions, Region{area, perimeter})
 			}
 		}
@@ -316,5 +362,4 @@ func Solve() {
 	utils.PrintSolution(12, 1, res)
 	res = solvePart2(lines)
 	utils.PrintSolution(12, 2, res)
-
 }
