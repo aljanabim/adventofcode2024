@@ -11,7 +11,7 @@ type Region struct {
 	perimeter int
 }
 
-func computePerimeter(name byte, row, col int, lines *[]string) (int, int, int, int) {
+func checkPerimeter(name byte, row, col int, lines *[]string) (int, int, int, int) {
 	var neighbor byte
 	topPerimeter := 0
 	rightPerimeter := 0
@@ -71,7 +71,7 @@ func computePerimeter(name byte, row, col int, lines *[]string) (int, int, int, 
 
 func visitNeighbors(name byte, row, col int, lines *[]string, cache Cache) (int, int) {
 	cache[[2]int{row, col}] = true
-	top, right, left, bottom := computePerimeter(name, row, col, lines)
+	top, right, left, bottom := checkPerimeter(name, row, col, lines)
 	perimeter := top + right + left + bottom
 	area := 1
 
@@ -114,14 +114,6 @@ func visitNeighbors(name byte, row, col int, lines *[]string, cache Cache) (int,
 	return area, perimeter
 }
 
-/*
-OOOOO
-OXOXO
-OOOOO
-OXOXO
-OOOOO
-*/
-
 func btoi(c bool) int {
 	if c {
 		return 1
@@ -142,18 +134,9 @@ type sides struct {
 	left   bool
 }
 
-/*
-AAAAAA
-AAABBA
-AAABBA
-ABBAAA
-ABBAAA
-AAAAAA
-*/
-
 func visitNeighbors2(name byte, row, col, sourceRow, sourceCol int, lines *[]string, cache Cache, checkedRows, checkedCols map[int]bool, sourceHas sides) (int, int) {
 	cache[[2]int{row, col}] = true
-	top, right, bottom, left := computePerimeter(name, row, col, lines)
+	top, right, bottom, left := checkPerimeter(name, row, col, lines)
 	newSourceHas := sides{itob(top), itob(right), itob(bottom), itob(left)}
 
 	countPerimeter := sides{itob(top), itob(right), itob(bottom), itob(left)}
@@ -172,18 +155,81 @@ func visitNeighbors2(name byte, row, col, sourceRow, sourceCol int, lines *[]str
 	if sourceHas.left && vertDir != 0 {
 		countPerimeter.left = false
 	}
+	// going right to left with a neighbor means we should check if neighbor above has a left
 	if horzDir == -1 && !itob(top) {
-		fmt.Println(countPerimeter)
-		countPerimeter.left = false
+		coutLeft := false
+		neiName := name
+		// if row > 0 && (*lines)[row-1][col] == name {
+		// 	_, _, _, pl := checkPerimeter(name, row-1, col, lines)
+		// 	fmt.Println("checking guy above", pl, cache[[2]int{row - 1, col}])
+		// 	if itob(pl) && !cache[[2]int{row - 1, col}] {
+		// 		// coutLeft = true
+		// 	}
+		// }
+		nrow := row - 1
+		neiName = (*lines)[nrow][col]
+		neiVisited := false
+		anyNeiHasLeftPer := false
+
+		for neiName == name && nrow >= 0 {
+			neiName = (*lines)[nrow][col]
+			if neiName == name {
+				neiVisited = neiVisited || cache[[2]int{nrow, col}]
+				fmt.Println("looping in left", string(neiName), nrow)
+				_, _, _, lp := checkPerimeter(name, nrow, col, lines)
+				anyNeiHasLeftPer = anyNeiHasLeftPer || itob(lp)
+			}
+			// 	if neiName != name {
+			// 		coutLeft = true
+			// 		break
+			// 	}
+			nrow--
+		}
+		fmt.Println("Any have been visited", neiVisited, anyNeiHasLeftPer)
+		// _, _, _, nl := checkPerimeter(name, nrow, col, lines)
+		// if itob(nl) { // above neighbor has no left side
+		countPerimeter.left = coutLeft
+		// }
 	}
+
+	// going down and row has already been checked (don't count bottom result if any)
+	if vertDir == 1 && checkedRows[row] {
+		fmt.Println("checking naught line")
+		if col < len((*lines)[0])-1 { // check right neighbor
+			nei := (*lines)[row][col+1]
+			if nei == name {
+				_, _, nb, _ := checkPerimeter(name, row, col+1, lines)
+				if itob(nb) { // if neighbor has bottom skip our own bottom
+					fmt.Println("checking neightbor", nb)
+					countPerimeter.bottom = false
+				}
+			}
+		}
+		if col > 0 { // check left neighbor
+			nei := (*lines)[row][col-1]
+			if nei == name {
+				_, _, nb, _ := checkPerimeter(name, row, col-1, lines)
+				if itob(nb) { // if neighbor has bottom skip our own bottom
+					fmt.Println("checking neightbor", nb)
+					countPerimeter.bottom = false
+				}
+			}
+		}
+	}
+	checkedRows[row] = row == sourceRow || vertDir == 1
+
+	// going up and previous cell had no bottom, then we must reset the previous row for until entered again when going down
+	if vertDir == -1 && !sourceHas.bottom {
+		checkedRows[sourceRow] = false
+	}
+
+	// checkedCols[col] = col == sourceCol
+
 	// if row > sourceRow { // came from top
 	// 	newSourcePerimeter.top = false
 	// } else if row < sourceRow { // came from bottom
 	// 	newSourcePerimeter.bottom = false
 	// }
-
-	// checkedRows[row] = row == sourceRow
-	// checkedCols[col] = col == sourceCol
 
 	// above
 	// newSourcePerimeter := sides{top: !checkedRows[row-1], right: !itob(right), bottom: false, left: !itob(left)}
@@ -235,22 +281,30 @@ func visitNeighbors2(name byte, row, col, sourceRow, sourceCol int, lines *[]str
 	// }
 
 	/*
-	   RRRRIICCFF
-	   RRRRIICCCF
-	   VVRRRCCFFF
-	   VVRCCCJFFF
-	   VVVVCJJCFE
-	   VVIVCCJJEE
-	   VVIIICJJEE
-	   MIIIIIJJEE
-	   MIIISIJEEE
-	   MMMISSJEEE
+		RRRRIICCFF
+		RRRRIICCCF
+		VVRRRCCFFF
+		VVRCCCJFFF
+		VVVVCJJCFE
+		VVIVCCJJEE
+		VVIIICJJEE
+		MIIIIIJJEE
+		MIIISIJEEE
+		MMMISSJEEE
+
+		XRRRRRX
+		XRRRXRX
+		XXRXXXX
+		XXRXXXX
+		XXXXXXX
 	*/
 
 	perimeter := top*btoi(countPerimeter.top) + right*btoi(countPerimeter.right) + bottom*btoi(countPerimeter.bottom) + left*btoi(countPerimeter.left)
-	fmt.Print("visiting \"", string(name), "\" at ", row, " ", col, " perim ", perimeter, "\t==\t")
-	fmt.Print(top, countPerimeter.top, right, countPerimeter.right, bottom, countPerimeter.bottom, left, countPerimeter.left)
-	fmt.Println("\tsource has", sourceHas)
+	if name == 'X' || name == 'C' {
+		fmt.Print("visiting \"", string(name), "\" at ", row, " ", col, " perim ", perimeter, "\t==\t")
+		fmt.Print(top, countPerimeter.top, right, countPerimeter.right, bottom, countPerimeter.bottom, left, countPerimeter.left)
+		fmt.Println("\tsource has", sourceHas)
+	}
 	area := 1
 
 	// check above
@@ -350,5 +404,7 @@ func Solve() {
 	utils.PrintSolution(12, 1, res)
 	res = solvePart2(lines)
 	utils.PrintSolution(12, 2, res)
-
+	// 1.359.028 - upper limit
+	//   821.799 - too low
+	//   835.777 - too low
 }

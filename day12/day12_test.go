@@ -51,7 +51,7 @@ MMMISSJEEE`
 	}
 }
 
-func _TestPart2_simple(t *testing.T) {
+func TestPart2_simple(t *testing.T) {
 	input := `AAAA
 BBCD
 BBCC
@@ -91,7 +91,7 @@ X0X`
 		t.Errorf("solvePart2 got %d want %d", got, want)
 	}
 }
-func _TestPart2_xo(t *testing.T) {
+func TestPart2_xo(t *testing.T) {
 	input := `OOOOO
 OXOXO
 OOOOO
@@ -106,7 +106,7 @@ OOOOO`
 	}
 }
 
-func _TestPart2_E(t *testing.T) {
+func TestPart2_E(t *testing.T) {
 	input := `EEEEE
 EXXXX
 EEEEE
@@ -120,7 +120,7 @@ EEEEE`
 	}
 }
 
-func _TestPart2_corners(t *testing.T) {
+func TestPart2_corners(t *testing.T) {
 	input := `AAAAAA
 AAABBA
 AAABBA
@@ -139,7 +139,7 @@ AAAAAA`
 	}
 }
 
-func _TestPart2_big(t *testing.T) {
+func TestPart2_big(t *testing.T) {
 	input := `RRRRIICCFF
 RRRRIICCCF
 VVRRRCCFFF
@@ -152,6 +152,34 @@ MIIISIJEEE
 MMMISSJEEE`
 	lines := strings.Split(input, "\n")
 	want := 1206
+	got := solvePart2(lines)
+	if got != want {
+		t.Errorf("solvePart2 got %d want %d", got, want)
+	}
+}
+
+func TestPart2_doubledeep(t *testing.T) {
+	input := `XRRRRRX
+XRRRXRX
+XXRXXXX
+XXRXXXX
+XXXXXXX`
+
+	lines := strings.Split(input, "\n")
+	want := 11*12 + 24*16
+	got := solvePart2(lines)
+	if got != want {
+		t.Errorf("solvePart2 got %d want %d", got, want)
+	}
+}
+
+func TestPart2_lefty(t *testing.T) {
+	input := `CC
+XC
+CC
+CC`
+	lines := strings.Split(input, "\n")
+	want := 7*8 + 4*1
 	got := solvePart2(lines)
 	if got != want {
 		t.Errorf("solvePart2 got %d want %d", got, want)
