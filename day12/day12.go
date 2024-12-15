@@ -112,43 +112,6 @@ func visitNeighbors(name byte, row, col int, lines *[]string, cache Cache) (int,
 	return area, perimeter
 }
 
-/*
-OOOOO
-OXOXO
-OOOOO
-OXOXO
-OOOOO
-*/
-
-func btoi(c bool) int {
-	if c {
-		return 1
-	}
-	return 0
-}
-func itob(i int) bool {
-	if i == 0 {
-		return false
-	}
-	return true
-}
-
-type sides struct {
-	top    bool
-	right  bool
-	bottom bool
-	left   bool
-}
-
-/*
-AAAAAA
-AAABBA
-AAABBA
-ABBAAA
-ABBAAA
-AAAAAA
-*/
-
 func buildRegionGrid(grid *[][]bool, name byte, row, col int, lines *[]string, cache Cache) int {
 	cache[[2]int{row, col}] = true
 	(*grid)[row][col] = true
@@ -195,12 +158,12 @@ func computeFenceCost(regions []Region) int {
 	cost := 0
 	for _, region := range regions {
 		cost += region.area * region.perimeter
-		// fmt.Println(region.area, "x", region.perimeter, "=", region.area*region.perimeter)
 	}
 	return cost
 }
 
 func solvePart1(lines []string) int {
+	defer utils.Duration(utils.Track("Part1"))
 	visitCache := make(Cache)
 	regions := []Region{}
 
@@ -226,8 +189,6 @@ func resetGrid(rows, cols int) [][]bool {
 
 func countSides(grid *[][]bool) int {
 	count := 0
-	// for row := range len(*grid) {
-	// for col := range len((*grid)[row]) {
 	for row, line := range *grid {
 		horzSides := 0
 		vertSides := 0
@@ -325,16 +286,13 @@ func countSides(grid *[][]bool) int {
 				}
 			}
 		}
-		// fmt.Println("Sides", line, "horz", horzSides, "vert", vertSides)
 		count += horzSides + vertSides
 	}
-	// }
-	// fmt.Println()
-	// }
 	return count
 }
 
 func solvePart2(lines []string) int {
+	defer utils.Duration(utils.Track("Part2"))
 	visitCache := make(Cache)
 	regions := []Region{}
 
@@ -344,7 +302,6 @@ func solvePart2(lines []string) int {
 				grid := resetGrid(len(lines), len(line))
 				area := buildRegionGrid(&grid, byte(name), row, col, &lines, visitCache)
 				perimeter := countSides(&grid)
-				// fmt.Println("Area", area, "perimeter", perimeter)
 				regions = append(regions, Region{area, perimeter})
 			}
 		}
