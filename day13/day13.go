@@ -92,11 +92,6 @@ func parseLines(lines []string, part2 bool) []Machine {
 	return machines
 }
 
-func round(n float64, d int) float64 {
-	dec := math.Pow(10, float64(d))
-	return math.Round(n*dec) / dec
-}
-
 func solveDay(lines []string, part2 bool) int {
 	defer utils.Duration(utils.Track(fmt.Sprintf("Solve Day, is Part 2 %v", part2)))
 	machines := parseLines(lines, part2)
