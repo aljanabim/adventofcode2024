@@ -40,10 +40,36 @@ func TestPart1(t *testing.T) {
 		panic(err)
 	}
 
-	got := solveDay1(lines)
+	got := solveDay(lines, false)
 	want := 480
 	if got != want {
 		t.Errorf("solveDay1 got %d want %d", got, want)
+	}
+}
+
+func TestPart1_full(t *testing.T) {
+	lines, err := utils.ReadLines("input")
+	if err != nil {
+		panic(err)
+	}
+
+	got := solveDay(lines, false)
+	want := 32041
+	if got != want {
+		t.Errorf("solveDay1 got %d want %d", got, want)
+	}
+}
+
+func TestPart2_full(t *testing.T) {
+	lines, err := utils.ReadLines("input")
+	if err != nil {
+		panic(err)
+	}
+
+	got := solveDay(lines, true)
+	want := 95843948914827
+	if got != want {
+		t.Errorf("solveDay2 got %d want %d", got, want)
 	}
 
 }
