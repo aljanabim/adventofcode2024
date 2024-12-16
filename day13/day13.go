@@ -10,6 +10,11 @@ import (
 )
 
 type Vec [2]float64
+
+func (m *Vec) length() float64 {
+	return math.Sqrt(m[0]*m[0] + m[1]*m[1])
+}
+
 type Matrix [2][2]float64
 
 func (m *Matrix) dot(v Vec) Vec {
@@ -55,7 +60,7 @@ func parseNumSlice(numsStr []string) []float64 {
 	return nums
 }
 
-func parseLines(lines []string) []Machine {
+func parseLines(lines []string, part2 bool) []Machine {
 	machines := []Machine{}
 	for row, line := range lines {
 		if len(line) == 0 || row == 0 {
@@ -70,9 +75,14 @@ func parseLines(lines []string) []Machine {
 			// Prize
 			Prize := parseNumSlice(strings.Split(strings.ReplaceAll(lines[row+2+shift][9:], "Y=", ""), ","))
 
+			target := Vec{Prize[0], Prize[1]}
+			if part2 {
+				target[0] += 10000000000000
+				target[1] += 10000000000000
+			}
 			machines = append(machines,
 				Machine{
-					Target: Vec{Prize[0], Prize[1]},
+					Target: target,
 					Motion: Matrix{
 						{buttonA[0], buttonB[0]},
 						{buttonA[1], buttonB[1]}},
@@ -87,8 +97,9 @@ func round(n float64, d int) float64 {
 	return math.Round(n*dec) / dec
 }
 
-func solveDay1(lines []string) int {
-	machines := parseLines(lines)
+func solveDay(lines []string, part2 bool) int {
+	defer utils.Duration(utils.Track(fmt.Sprintf("Solve Day, is Part 2 %v", part2)))
+	machines := parseLines(lines, part2)
 	cost := 0
 	for _, m := range machines {
 		inv, err := inverse(m.Motion)
@@ -96,23 +107,13 @@ func solveDay1(lines []string) int {
 			continue
 		}
 		sol := inv.dot(m.Target)
-		buttonAPresses := sol[0]
-		buttonBPresses := sol[1]
-
-		buttonAValid := buttonAPresses >= 0 && round(buttonAPresses, 5)-math.Round(buttonAPresses) < 1e-5
-		buttonBValid := buttonBPresses >= 0 && round(buttonBPresses, 5)-math.Round(buttonBPresses) < 1e-5
-
-		if buttonAValid || buttonBValid {
-			fmt.Println("Good Either", m.Motion, "A", buttonAPresses, "B", buttonBPresses)
-		}
-		if buttonAValid && buttonBValid {
+		solTarget := m.Motion.dot(Vec{math.Round(sol[0]), math.Round(sol[1])})
+		distVec := Vec{m.Target[0] - solTarget[0], m.Target[1] - solTarget[1]}
+		solValid := distVec.length() == 0 && sol[0] >= 0 && sol[1] >= 0
+		if solValid {
+			buttonAPresses := sol[0]
+			buttonBPresses := sol[1]
 			cost += int(math.Round(buttonAPresses)*3) + int(math.Round(buttonBPresses))
-		}
-		if buttonAValid {
-			fmt.Println("button A", m.Target, math.Round(buttonAPresses))
-		}
-		if buttonBValid {
-			fmt.Println("button B", m.Target, math.Round(buttonBPresses))
 		}
 	}
 	return cost
@@ -124,9 +125,8 @@ func Solve() {
 		panic(err)
 	}
 
-	res := solveDay1(lines)
+	res := solveDay(lines, false)
 	utils.PrintSolution(13, 1, res)
-	// too low
-	// 18043
-	// 25329
+	res = solveDay(lines, true)
+	utils.PrintSolution(13, 2, res)
 }
