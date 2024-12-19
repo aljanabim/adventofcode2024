@@ -1,6 +1,10 @@
 package day14
 
 import (
+	"bufio"
+	"fmt"
+	"log"
+	"os"
 	"strconv"
 	"strings"
 
@@ -43,11 +47,11 @@ func parseNumSlice(numsStr []string) []int {
 	return nums
 }
 
-func parseLines(lines []string) []Robot {
-	robots := make([]Robot, len(lines))
+func parseLines(lines []string) []*Robot {
+	robots := make([]*Robot, len(lines))
 	for i, line := range lines {
 		nums := parseNumSlice(strings.Split(strings.ReplaceAll(line[2:], " v=", ","), ","))
-		robots[i] = Robot{X: nums[0], Y: nums[1], Vx: nums[2], Vy: nums[3]}
+		robots[i] = &Robot{X: nums[0], Y: nums[1], Vx: nums[2], Vy: nums[3]}
 	}
 	return robots
 }
@@ -78,12 +82,71 @@ func solvePart1(lines []string, sim_steps, xLimit, yLimit int) int {
 
 	for _, robot := range robots {
 		robot.Step(sim_steps, xLimit, yLimit)
-		if q := getQuadrant(&robot, xLimit, yLimit); q >= 0 {
+		if q := getQuadrant(robot, xLimit, yLimit); q >= 0 {
 			quadrants[q] += 1
 		}
 	}
 
 	return quadrants[0] * quadrants[1] * quadrants[2] * quadrants[3]
+}
+
+func solvePart2(lines []string) int {
+	// sim_steps := 100
+	xLimit := 101
+	yLimit := 103
+	grid := [103][101]string{}
+	robots := parseLines(lines)
+
+	// scanner := bufio.NewScanner(os.Stdin)
+
+	i := 0
+	for {
+		i++
+		xPosCount := map[int]int{}
+		yPosCount := map[int]int{}
+		for row := range yLimit {
+			for col := range xLimit {
+				grid[row][col] = "."
+			}
+		}
+		for _, robot := range robots {
+			robot.Step(1, xLimit, yLimit)
+			grid[robot.Y][robot.X] = "X"
+			xPosCount[robot.X]++
+			yPosCount[robot.Y]++
+		}
+		fmt.Println("step", i)
+		xPosOk := false
+		yPosOk := false
+		for _, count := range xPosCount {
+			if count >= 31 {
+				xPosOk = true
+				break
+			}
+		}
+
+		for _, count := range yPosCount {
+			if count >= 31 {
+				yPosOk = true
+				break
+			}
+		}
+
+		if xPosOk && yPosOk {
+			for _, row := range grid {
+				fmt.Println(row)
+			}
+			fmt.Println("step", i)
+			reader := bufio.NewReader(os.Stdin)
+			_, err := reader.ReadString('\n')
+			if err != nil {
+				log.Fatal(err)
+			}
+			break
+		}
+	}
+
+	return i
 }
 
 func Solve() {
@@ -93,6 +156,8 @@ func Solve() {
 	}
 	res := solvePart1(lines, 100, 101, 103)
 	utils.PrintSolution(14, 1, res)
+	res = solvePart2(lines)
+	utils.PrintSolution(14, 2, res)
 	// too low
 	// 103401760
 }
