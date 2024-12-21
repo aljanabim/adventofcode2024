@@ -1,9 +1,10 @@
 package day15
 
 import (
-	"fmt"
 	"os"
 	"strings"
+
+	"github.com/aljanabim/adventofcode2024/utils"
 )
 
 type Entity int
@@ -12,6 +13,7 @@ const (
 	FREE Entity = iota
 	BOX
 	WALL
+	ROBOT
 )
 
 type Dir int
@@ -24,21 +26,61 @@ const (
 )
 
 var dirMap = map[Dir][2]int{
-	UP:    {0, -1},
-	DOWN:  {0, 1},
-	LEFT:  {-1, 0},
-	RIGHT: {1, 0},
+	UP:    {-1, 0},
+	DOWN:  {1, 0},
+	LEFT:  {0, -1},
+	RIGHT: {0, 1},
 }
 
 type Robot struct {
-	X     int
-	Y     int
-	moves []Dir
+	X int
+	Y int
+}
+
+func (r *Robot) Move(dir Dir) {
+	r.X += dirMap[dir][1]
+	r.Y += dirMap[dir][0]
 }
 
 type Warehouse struct {
 	Grid  [][]Entity
 	Robot Robot
+}
+
+func (w *Warehouse) Step(moves []Dir) {
+	for _, move := range moves {
+		boxesToMove := [][2]int{}
+		col := w.Robot.X
+		row := w.Robot.Y
+		moveRobot := false
+		// Get boxes to move and whether to move robot
+		for {
+			row += dirMap[move][0]
+			col += dirMap[move][1]
+			entity := w.Grid[row][col]
+			if entity == WALL {
+				boxesToMove = [][2]int{}
+				moveRobot = false
+				break
+			} else if entity == BOX {
+				boxesToMove = append(boxesToMove, [2]int{row, col})
+			} else if entity == FREE {
+				moveRobot = true
+				break
+			}
+		}
+		// Move boxes
+		for _, box := range boxesToMove {
+			movedBox := [2]int{box[0] + dirMap[move][0], box[1] + dirMap[move][1]}
+			w.Grid[movedBox[0]][movedBox[1]] = BOX
+		}
+		// Move robot
+		if moveRobot {
+			w.Grid[w.Robot.Y][w.Robot.X] = FREE
+			w.Robot.Move(move)
+			w.Grid[w.Robot.Y][w.Robot.X] = ROBOT
+		}
+	}
 }
 
 func readMap(lines []string) Warehouse {
@@ -56,7 +98,7 @@ func readMap(lines []string) Warehouse {
 			case 'O':
 				row[col] = BOX
 			case '@':
-				row[col] = FREE
+				row[col] = ROBOT
 				warehouse.Robot.X = col
 				warehouse.Robot.Y = i
 			default:
@@ -69,46 +111,60 @@ func readMap(lines []string) Warehouse {
 	return warehouse
 }
 
-func readMoves(file string, robot *Robot) error {
+func readMoves(file string) ([]Dir, error) {
 	rawData, err := os.ReadFile(file)
 	if err != nil {
-		return err
+		return nil, err
 	}
+	line := strings.Split(string(rawData), "")
+	moves := make([]Dir, len(line))
 
-	for _, f := range strings.Split(string(rawData), "") {
+	for i, f := range line {
 		switch f {
 		case "^":
-			robot.moves = append(robot.moves, UP)
+			moves[i] = UP
 		case "v":
-			robot.moves = append(robot.moves, DOWN)
+			moves[i] = DOWN
 		case ">":
-			robot.moves = append(robot.moves, RIGHT)
+			moves[i] = RIGHT
 		case "<":
-			robot.moves = append(robot.moves, LEFT)
+			moves[i] = LEFT
 		}
 	}
-	return nil
+	return moves, nil
 }
 
 func computeGPSSum(warehouse *Warehouse) int {
-
-	return 0
+	sum := 0
+	for y, row := range warehouse.Grid {
+		for x, e := range row {
+			if e == BOX {
+				sum += y*100 + x
+			}
+		}
+	}
+	return sum
 }
 
-func Solve() {
-	rawData, err := os.ReadFile("day15/map_mini.txt")
+func solvePart1() int {
+	rawData, err := os.ReadFile("day15/map.txt")
 	if err != nil {
 		panic(err)
 	}
+
 	lines := strings.Split(string(rawData), "\n")
 	warehouse := readMap(lines)
 
-	for _, row := range warehouse.Grid {
-		fmt.Println(row)
-	}
-	err = readMoves("day15/moves_mini.txt", &warehouse.Robot)
+	moves, err := readMoves("day15/moves.txt")
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(warehouse.Robot)
+
+	warehouse.Step(moves)
+	res := computeGPSSum(&warehouse)
+	return res
+}
+func Solve() {
+	res := solvePart1()
+	utils.PrintSolution(15, 1, res)
 }
