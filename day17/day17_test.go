@@ -23,6 +23,44 @@ func TestRunProgram(t *testing.T) {
 
 }
 
+func TestRunProgram_part2(t *testing.T) {
+	lines, err := utils.ReadLines("input_test_copyself.txt")
+	if err != nil {
+		panic(err)
+	}
+	register, instructions, err := readInput(lines)
+	register.A = 117440
+	if err != nil {
+		panic(err)
+	}
+	got := RunProgram(&register, instructions)
+	want := "0,3,5,4,3,0"
+	if got != want {
+		t.Fatalf("got %s want %s", got, want)
+	}
+}
+
+func TestGetValidRegiser(t *testing.T) {
+	lines, err := utils.ReadLines("input_test_copyself.txt")
+	if err != nil {
+		panic(err)
+	}
+	register, instructions, err := readInput(lines)
+	if err != nil {
+		panic(err)
+	}
+	expected := []int{}
+	for _, inst := range instructions {
+		expected = append(expected, inst.Opcode)
+		expected = append(expected, inst.Operand)
+	}
+	got := GetValidRegister(&register, instructions, expected)
+	want := 117440
+	if got != want {
+		t.Fatalf("got %d want %d", got, want)
+	}
+}
+
 func TestBst(t *testing.T) {
 	register := Register{C: 9}
 	instruction := Instruction{Opcode: 2, Operand: 6}

@@ -2,7 +2,6 @@ package day17
 
 import (
 	"fmt"
-	"math"
 	"strconv"
 	"strings"
 
@@ -43,7 +42,8 @@ func (inst *Instruction) Combo(register *Register) int {
 
 // Opcode 0
 func Adv(inst Instruction, register *Register) {
-	register.A = int(float64(register.A) / math.Pow(2, float64(inst.Combo(register))))
+	register.A >>= inst.Combo(register)
+	// int(float64(register.A) / math.Pow(2, float64(inst.Combo(register))))
 }
 
 // Opcode 1
@@ -77,12 +77,14 @@ func Out(inst Instruction, register *Register) int {
 
 // Opcode 6
 func Bdv(inst Instruction, register *Register) {
-	register.B = int(float64(register.A) / math.Pow(2, float64(inst.Combo(register))))
+	register.B = register.A >> inst.Combo(register)
+	// register.B = int(float64(register.A) / math.Pow(2, float64(inst.Combo(register))))
 }
 
 // Opcode 7
 func Cdv(inst Instruction, register *Register) {
-	register.C = int(float64(register.A) / math.Pow(2, float64(inst.Combo(register))))
+	register.C = register.A >> inst.Combo(register)
+	// register.C = int(float64(register.A) / math.Pow(2, float64(inst.Combo(register))))
 }
 
 func RunProgram(register *Register, instructions []Instruction) string {
@@ -118,6 +120,61 @@ func RunProgram(register *Register, instructions []Instruction) string {
 		}
 	}
 	return out.String()[:out.Len()-1]
+}
+
+func GetValidRegister(register *Register, instructions []Instruction, expected []int) int {
+	validA := 1
+
+	for {
+		result := []int{}
+		register.PIdx = 0
+		register.A = validA
+		register.B = 0
+		register.C = 0
+		inc := true
+	progLoop:
+		for register.PIdx < len(instructions) {
+			inst := instructions[register.PIdx]
+			inc = true
+			switch inst.Opcode {
+			case 0:
+				Adv(inst, register)
+			case 1:
+				Bxl(inst, register)
+			case 2:
+				Bst(inst, register)
+			case 3:
+				jumped := Jnz(inst, register)
+				if jumped {
+					inc = false
+				}
+			case 4:
+				Bxc(inst, register)
+			case 5:
+				result = append(result, Out(inst, register))
+				if result[len(result)-1] != expected[len(result)-1] {
+					// fmt.Println("Oppps results not match expected", result, expected)
+					break progLoop
+				}
+			case 6:
+				Bdv(inst, register)
+			case 7:
+				Cdv(inst, register)
+			}
+			if inc {
+				register.PIdx++
+			}
+		}
+		if len(result) == len(expected) && result[len(result)-1] == expected[len(result)-1] {
+			// fmt.Println("Found the fucker", validA, result)
+			break
+		}
+		if validA%1_000_000 == 0 {
+			fmt.Println("Testing", validA)
+		}
+		validA++
+	}
+	return validA
 }
 
 func readInput(lines []string) (Register, []Instruction, error) {
@@ -159,7 +216,7 @@ func readInput(lines []string) (Register, []Instruction, error) {
 	return reg, program, nil
 }
 
-func Solve() {
+func solvePart1() string {
 	lines, err := utils.ReadLines("day17/input.txt")
 	if err != nil {
 		panic(err)
@@ -168,6 +225,29 @@ func Solve() {
 	if err != nil {
 		panic(err)
 	}
-	res := RunProgram(&register, instructions)
+	return RunProgram(&register, instructions)
+}
+
+func solvePart2() int {
+	lines, err := utils.ReadLines("day17/input.txt")
+	if err != nil {
+		panic(err)
+	}
+	register, instructions, err := readInput(lines)
+	if err != nil {
+		panic(err)
+	}
+	expected := []int{}
+	for _, inst := range instructions {
+		expected = append(expected, inst.Opcode)
+		expected = append(expected, inst.Operand)
+	}
+	return GetValidRegister(&register, instructions, expected)
+}
+
+func Solve() {
+	res := solvePart1()
 	utils.PrintSolution(17, 1, res)
+	res2 := solvePart2()
+	utils.PrintSolution(17, 2, res2)
 }
