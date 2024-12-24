@@ -87,8 +87,8 @@ func Cdv(inst Instruction, register *Register) {
 	// register.C = int(float64(register.A) / math.Pow(2, float64(inst.Combo(register))))
 }
 
-func RunProgram(register *Register, instructions []Instruction) string {
-	out := strings.Builder{}
+func RunProgram(register *Register, instructions []Instruction) []int {
+	out := []int{}
 
 	inc := true
 	for register.PIdx < len(instructions) {
@@ -109,7 +109,7 @@ func RunProgram(register *Register, instructions []Instruction) string {
 		case 4:
 			Bxc(inst, register)
 		case 5:
-			out.WriteString(fmt.Sprintf("%d,", Out(inst, register)))
+			out = append(out, Out(inst, register))
 		case 6:
 			Bdv(inst, register)
 		case 7:
@@ -119,7 +119,7 @@ func RunProgram(register *Register, instructions []Instruction) string {
 			register.PIdx++
 		}
 	}
-	return out.String()[:out.Len()-1]
+	return out
 }
 
 func GetValidRegister(register *Register, instructions []Instruction, expected []int) int {
@@ -177,6 +177,33 @@ func GetValidRegister(register *Register, instructions []Instruction, expected [
 	return validA
 }
 
+// The program boils down to the following
+// while A not 0
+//
+//	B <- (A%8)^(A>>((A%8)^7))
+//	out: B % 8
+//	A >>= 3
+//
+// For 0 we need A=XXX B=000, thus, we need A=XXX such that B%8=000, then unshifting A << 3
+// For 3 we need A=XXXYYY B=010, thus we need A=XXXYYYY such that B%8=010, then unshifting A<<3 and so on
+func SearchValidA(instructions []Instruction, expected []int, step int, ANext int) int {
+	if step == -1 {
+		return ANext
+	}
+	for i := range 8 {
+		register := &Register{A: (ANext << 3) | i}
+		out := RunProgram(register, instructions)
+		if out[0] == expected[step] {
+			// fmt.Printf("At step %d - Got with %d A=%d: %v\n", step, i, ANext<<3|i, out)
+			res := SearchValidA(instructions, expected, step-1, ANext<<3|i)
+			if res != -1 {
+				return res
+			}
+		}
+	}
+	return -1
+}
+
 func readInput(lines []string) (Register, []Instruction, error) {
 	reg := Register{}
 	program := []Instruction{}
@@ -216,7 +243,17 @@ func readInput(lines []string) (Register, []Instruction, error) {
 	return reg, program, nil
 }
 
+func parseOut(out []int) string {
+	outStr := make([]string, len(out))
+	for i, num := range out {
+		outStr[i] = fmt.Sprint(num)
+	}
+	return strings.Join(outStr, ",")
+
+}
+
 func solvePart1() string {
+	defer utils.Duration(utils.Track("Part 1"))
 	lines, err := utils.ReadLines("day17/input.txt")
 	if err != nil {
 		panic(err)
@@ -225,10 +262,10 @@ func solvePart1() string {
 	if err != nil {
 		panic(err)
 	}
-	return RunProgram(&register, instructions)
+	return parseOut(RunProgram(&register, instructions))
 }
 
-func solvePart2() int {
+func solvePart2BruteForce() int {
 	lines, err := utils.ReadLines("day17/input.txt")
 	if err != nil {
 		panic(err)
@@ -243,6 +280,23 @@ func solvePart2() int {
 		expected = append(expected, inst.Operand)
 	}
 	return GetValidRegister(&register, instructions, expected)
+}
+func solvePart2() int {
+	defer utils.Duration(utils.Track("Part 2"))
+	lines, err := utils.ReadLines("day17/input.txt")
+	if err != nil {
+		panic(err)
+	}
+	_, instructions, err := readInput(lines)
+	if err != nil {
+		panic(err)
+	}
+	expected := []int{}
+	for _, inst := range instructions {
+		expected = append(expected, inst.Opcode)
+		expected = append(expected, inst.Operand)
+	}
+	return SearchValidA(instructions, expected, len(expected)-1, 0)
 }
 
 func Solve() {
