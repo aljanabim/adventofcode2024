@@ -184,8 +184,9 @@ func GetValidRegister(register *Register, instructions []Instruction, expected [
 //	out: B % 8
 //	A >>= 3
 //
-// For 0 we need A=XXX B=000, thus, we need A=XXX such that B%8=000, then unshifting A << 3
-// For 3 we need A=XXXYYY B=010, thus we need A=XXXYYYY such that B%8=010, then unshifting A<<3 and so on
+// For 0 (last operand)     we need A=XXX B=000, thus, we need A=XXX such that B%8=000, so we search for all A \in [0,7].
+// For 3 (last instruction) we need A=XXXYYY B=010, thus we need A=XXXYYYY such that B%8=010, then unshifting A<<3
+// and so on until the first instruction
 func SearchValidA(instructions []Instruction, expected []int, step int, ANext int) int {
 	if step == -1 {
 		return ANext
