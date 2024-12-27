@@ -1,7 +1,7 @@
 package day20
 
 import (
-	"math"
+	"fmt"
 
 	"github.com/aljanabim/adventofcode2024/utils"
 )
@@ -80,61 +80,14 @@ func walkMaze(maze *Maze) [][2]int {
 	return path
 }
 
-func getSavingsFreq(path [][2]int, maxCheat int) map[int]int {
+func getSavingsFreq(path [][2]int, maxCheat int, maze *Maze) map[int]int {
+	defer utils.Duration(utils.Track(fmt.Sprintf("Get Savings Freq with maxCheat %d", maxCheat)))
 	saving2Freq := map[int]int{} // maps number of pico seconds saved to frequency
 	for i, step := range path {
-		// fmt.Println(i, step)
-		for depth := 2; depth <= maxCheat; depth++ {
-			upPos := [2]int{step[0] + depth*dir2Move[UP][0], step[1] + depth*dir2Move[UP][1]}
-			rightPos := [2]int{step[0] + depth*dir2Move[RIGHT][0], step[1] + depth*dir2Move[RIGHT][1]}
-			downPos := [2]int{step[0] + depth*dir2Move[DOWN][0], step[1] + depth*dir2Move[DOWN][1]}
-			leftPos := [2]int{step[0] + depth*dir2Move[LEFT][0], step[1] + depth*dir2Move[LEFT][1]}
-
-			for j, cheatStep := range path[i+1:] {
-				if cheatStep == upPos || cheatStep == rightPos || cheatStep == downPos || cheatStep == leftPos {
-					if j-1 > 0 {
-						saving2Freq[j-1]++
-					}
-				}
-			}
-			// fmt.Println("look to sides", leftPos, rightPos)
-		}
-	}
-	return saving2Freq
-}
-
-/*
-.....3.....
-....323....
-...3...3...
-..32.O.23..  O @ (3,5)
-...3...3...
-....323....
-.....3.....
-*/
-
-func getSavingsFreq2(path [][2]int, maxCheat int, maze *Maze) map[int]int {
-	saving2Freq := map[int]int{} // maps number of pico seconds saved to frequency
-	for i, step := range path {
-		reachablePoints := map[[2]int]int{}
-		rowLowerLim := int(math.Max(float64(step[0]-maxCheat), 0))
-		rowUpperLim := int(math.Min(float64(step[0]+maxCheat), float64(len(maze.Grid))-1))
-		colLowerLim := int(math.Max(float64(step[1]-maxCheat), 0))
-		colUpperLim := int(math.Min(float64(step[1]+maxCheat), float64(len(maze.Grid[0]))-1))
-
-		for row := rowLowerLim; row <= rowUpperLim; row++ {
-			for col := colLowerLim; col <= colUpperLim; col++ {
-				dist := utils.Abs(step[0]-row) + utils.Abs(step[1]-col)
-				if 1 <= dist && dist <= maxCheat && maze.Grid[row][col] == FREE {
-					reachablePoints[[2]int{row, col}] = dist
-				}
-			}
-		}
-
 		for j, cheatStep := range path[i+1:] {
-			cheatDist := reachablePoints[cheatStep]
+			cheatDist := utils.Abs(step[0]-cheatStep[0]) + utils.Abs(step[1]-cheatStep[1])
 			cheatSaving := j - cheatDist + 1
-			if cheatDist > 0 && cheatSaving > 0 {
+			if cheatDist <= maxCheat && cheatSaving > 0 {
 				saving2Freq[cheatSaving] += 1
 			}
 		}
@@ -142,25 +95,10 @@ func getSavingsFreq2(path [][2]int, maxCheat int, maze *Maze) map[int]int {
 	return saving2Freq
 }
 
-func solvePart1(lines []string, saveLimit int) int {
-	defer utils.Duration(utils.Track("Part1"))
+func solveParts(lines []string, saveLimit int, maxCheat int) int {
 	maze := buildMaze(lines)
 	path := walkMaze(&maze)
-	savings2Freq := getSavingsFreq(path, 2)
-	count := 0
-	for saving, freq := range savings2Freq {
-		if saving >= saveLimit {
-			count += freq
-		}
-	}
-	return count
-}
-
-func solvePart2(lines []string, saveLimit int, maxCheat int) int {
-	defer utils.Duration(utils.Track("Part2"))
-	maze := buildMaze(lines)
-	path := walkMaze(&maze)
-	savings2Freq := getSavingsFreq2(path, maxCheat, &maze)
+	savings2Freq := getSavingsFreq(path, maxCheat, &maze)
 	count := 0
 	for saving, freq := range savings2Freq {
 		if saving >= saveLimit {
@@ -175,11 +113,8 @@ func Solve() {
 	if err != nil {
 		panic(err)
 	}
-
-	res := solvePart1(lines, 100)
+	res := solveParts(lines, 100, 2)
 	utils.PrintSolution(20, 1, res)
-	res = solvePart2(lines, 100, 2)
-	res = solvePart2(lines, 100, 20)
+	res = solveParts(lines, 100, 20)
 	utils.PrintSolution(20, 2, res)
-
 }
