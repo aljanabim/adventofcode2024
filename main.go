@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/aljanabim/adventofcode2024/day20"
+	"github.com/aljanabim/adventofcode2024/day21"
 )
 
 func main() {
@@ -23,6 +23,7 @@ func main() {
 	// day17.Solve()
 	// day18.Solve()
 	// day19.Solve()
-	day20.Solve()
+	// day20.Solve()
+	day21.Solve()
 
 }
