@@ -1,7 +1,7 @@
 package day21
 
 import (
-	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/aljanabim/adventofcode2024/utils"
@@ -30,8 +30,8 @@ R1
 R2
 */
 
-func createKeyMap(grid [][]string, avoid [2]int) map[[2]string]string {
-	key2Seq := map[[2]string]string{}
+func createKeyMap(grid [][]string, avoid [2]int) map[[2]string][]string {
+	key2Seq := map[[2]string][]string{}
 	for i := 0; i < len(grid); i++ {
 		for j := 0; j < len(grid[0]); j++ {
 			from := grid[i][j]
@@ -39,40 +39,45 @@ func createKeyMap(grid [][]string, avoid [2]int) map[[2]string]string {
 				for jj := 0; jj < len(grid[0]); jj++ {
 					to := grid[ii][jj]
 					if len(from) > 0 && len(to) > 0 {
-						s := strings.Builder{}
 						vertMoves := ii - i // + = move down	- = move up
 						horzMoves := jj - j // + = move right	- = move left
-						// Flip priority between horz and vert check on
-						// row where we have the missing button
-						if avoid[0] == i {
+						paths := []string{}
+						// fmt.Println("Skip check horz")
+						skipCheckHorzFirst := i == avoid[0] && jj == avoid[1]
+						skipCheckVertFirst := j == avoid[1] && ii == avoid[0]
+						checkDiag := utils.Abs(vertMoves) > 0 && utils.Abs(horzMoves) > 0
+
+						if !skipCheckVertFirst {
+							s := strings.Builder{}
 							if vertMoves < 0 { // move up
 								s.WriteString(strings.Repeat("^", utils.Abs(vertMoves)))
+							} else { // move down
+								s.WriteString(strings.Repeat("v", vertMoves))
 							}
 							if horzMoves > 0 { // move right
 								s.WriteString(strings.Repeat(">", horzMoves))
-							}
-							if horzMoves < 0 { // move left
+							} else { // move left
 								s.WriteString(strings.Repeat("<", utils.Abs(horzMoves)))
 							}
-							if vertMoves > 0 { // move down
-								s.WriteString(strings.Repeat("v", vertMoves))
-							}
-						} else {
-							if horzMoves < 0 { // move left
-								s.WriteString(strings.Repeat("<", utils.Abs(horzMoves)))
-							}
-							if vertMoves < 0 { // move up
-								s.WriteString(strings.Repeat("^", utils.Abs(vertMoves)))
-							}
-							if horzMoves > 0 { // move right
-								s.WriteString(strings.Repeat(">", horzMoves))
-							}
-							if vertMoves > 0 { // move down
-								s.WriteString(strings.Repeat("v", vertMoves))
-							}
+							s.WriteRune('A')
+							paths = append(paths, s.String())
 						}
-						s.WriteRune('A')
-						key2Seq[[2]string{from, to}] = s.String()
+						if !skipCheckHorzFirst && checkDiag {
+							s := strings.Builder{}
+							if horzMoves > 0 { // move right
+								s.WriteString(strings.Repeat(">", horzMoves))
+							} else { // move left
+								s.WriteString(strings.Repeat("<", utils.Abs(horzMoves)))
+							}
+							if vertMoves < 0 { // move up
+								s.WriteString(strings.Repeat("^", utils.Abs(vertMoves)))
+							} else { // move down
+								s.WriteString(strings.Repeat("v", vertMoves))
+							}
+							s.WriteRune('A')
+							paths = append(paths, s.String())
+						}
+						key2Seq[[2]string{from, to}] = paths
 					}
 				}
 			}
@@ -81,25 +86,67 @@ func createKeyMap(grid [][]string, avoid [2]int) map[[2]string]string {
 	return key2Seq
 }
 
-func computeKeySequence(code string, key2Seq map[[2]string]string) string {
-	from := "A"
-	seq := strings.Builder{}
-	for _, to := range code {
-		seq.WriteString(key2Seq[[2]string{from, string(to)}])
-		from = string(to)
+func computeKeySequence(code string, key2Seq map[[2]string][]string, seq string, seqs *[]string) {
+	if len(code) < 2 {
+		*seqs = append(*seqs, seq)
+		return
 	}
-	return seq.String()
+	var from string
+	var to string
+	var nextSeqStartIdx int
+	if len(seq) == 0 {
+		from = "A"
+		to = string(code[0])
+		nextSeqStartIdx = 0
+	} else {
+		from = string(code[0])
+		to = string(code[1])
+		nextSeqStartIdx = 1
+	}
+	paths := key2Seq[[2]string{from, to}]
+	for _, path := range paths {
+		computeKeySequence(code[nextSeqStartIdx:], key2Seq, seq+path, seqs)
+	}
+}
+func computeDirBotSequence(seqs []string, key2Seq map[[2]string][]string) []string {
+	dirBotSeqs := []string{}
+	for _, seq := range seqs {
+		computeKeySequence(seq, key2Seq, "", &dirBotSeqs)
+	}
+	return dirBotSeqs
 }
 
-func computeFinalSeq(code string, num2Seq map[[2]string]string, dir2Seq map[[2]string]string) string {
-	fmt.Println("Code", code)
-	r0Seq := computeKeySequence(code, num2Seq)
-	fmt.Println("R0", r0Seq)
-	r1Seq := computeKeySequence(r0Seq, dir2Seq)
-	fmt.Println("R1", r1Seq)
-	r2Seq := computeKeySequence(r1Seq, dir2Seq)
-	fmt.Println("R2", r2Seq)
-	return r2Seq
+func computeFinalSeq(code string, num2Seq map[[2]string][]string, dir2Seq map[[2]string][]string) string {
+	// fmt.Println("Code", code)
+	// r0Seq := computeKeySequence(code, num2Seq)
+	// fmt.Println("R0", r0Seq)
+	// r1Seq := computeKeySequence(r0Seq, dir2Seq)
+	// fmt.Println("R1", r1Seq)
+	// r2Seq := computeKeySequence(r1Seq, dir2Seq)
+	// fmt.Println("R2", r2Seq)
+	// return r2Seq
+
+	dirBot1Seqs := []string{}
+	computeKeySequence(code, num2Seq, "", &dirBot1Seqs)
+	// fmt.Println("Dir bot 1 Seqs", dirBot1Seqs)
+
+	dirBot2Seqs := computeDirBotSequence(dirBot1Seqs, dir2Seq)
+	// fmt.Println("Dir bot 2 Seqs")
+	// for _, seq := range dirBot2Seqs[len(dirBot2Seqs)-1:] {
+	// 	fmt.Println(seq)
+	// }
+
+	dirBot3Seqs := computeDirBotSequence(dirBot2Seqs, dir2Seq)
+	// fmt.Println("Dir bot 3 Seqs")
+	minLen := len(dirBot3Seqs[0])
+	minIdx := 0
+	for i, seq := range dirBot3Seqs {
+		if len(seq) < minLen {
+			minLen = len(seq)
+			minIdx = i
+		}
+	}
+	return dirBot3Seqs[minIdx]
 }
 
 var codes = []string{
@@ -118,32 +165,42 @@ func solvePart1(codes []string) int {
 		{"", "0", "A"},
 	}
 
-	// dirpadGrid := [][]string{
-	// 	{"", "^", "A"},
-	// 	{"<", "v", ">"},
-	// }
+	dirpadGrid := [][]string{
+		{"", "^", "A"},
+		{"<", "v", ">"},
+	}
 
 	num2Seq := createKeyMap(numpadGrid, [2]int{3, 0})
-	for nums, seq := range num2Seq {
-		fmt.Println(nums, seq)
-	}
-	// dir2Seq := createKeyMap(dirpadGrid, [2]int{0, 0})
-	tot := 0
-	// for _, code := range codes {
-	// 	numI64, err := strconv.ParseInt(code[:len(code)-1], 10, 64)
-	// 	num := int(numI64)
-	// 	if err != nil {
-	// 		panic(err)
+
+	// for nums, seq := range num2Seq {
+	// 	if nums[0] == "A" {
+	// 		fmt.Println(nums, seq)
 	// 	}
-	// 	finalSeq := computeFinalSeq(code, num2Seq, dir2Seq)
-	// 	tot += num * len(finalSeq)
 	// }
+	// fmt.Println()
+	dir2Seq := createKeyMap(dirpadGrid, [2]int{0, 0})
+	// for nums, seq := range dir2Seq {
+	// 	if nums[0] == "A" {
+	// 		fmt.Println(nums, seq)
+	// 	}
+	// }
+	tot := 0
+	for _, code := range codes {
+		finalSeq := computeFinalSeq(code, num2Seq, dir2Seq)
+
+		numI64, err := strconv.ParseInt(code[:len(code)-1], 10, 64)
+		num := int(numI64)
+		if err != nil {
+			panic(err)
+		}
+		// fmt.Println(num, len(finalSeq))
+		tot += num * len(finalSeq)
+	}
 
 	return tot
 }
 
 func Solve() {
 	res := solvePart1(codes)
-	// 138560 - too high
 	utils.PrintSolution(21, 1, res)
 }
