@@ -32,7 +32,7 @@ func TestComputeFinalSeq(t *testing.T) {
 	dir2Seq := createKeyMap(dirpadGrid, [2]int{0, 0})
 
 	for _, c := range testCodes {
-		finalSeq := computeFinalSeq(c.code, num2Seq, dir2Seq)
+		finalSeq := computeFinalSeq(2, c.code, num2Seq, dir2Seq)
 		if c.length != len(finalSeq) {
 			t.Errorf("computeFinalSeq(%q) got len %d want %d\nSeq: %s", c.code, len(finalSeq), c.length, finalSeq)
 		}
@@ -47,7 +47,7 @@ func TestSolvePart1(t *testing.T) {
 		"456A",
 		"379A",
 	}
-	got := solvePart1(codes)
+	got := solvePart(2, codes)
 	want := 126384
 	if got != want {
 		t.Fatalf("got %d want %d", got, want)

@@ -1,6 +1,7 @@
 package day21
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 
@@ -86,6 +87,8 @@ func createKeyMap(grid [][]string, avoid [2]int) map[[2]string][]string {
 	return key2Seq
 }
 
+var cache = map[string][]string{}
+
 func computeKeySequence(code string, key2Seq map[[2]string][]string, seq string, seqs *[]string) {
 	if len(code) < 2 {
 		*seqs = append(*seqs, seq)
@@ -116,37 +119,28 @@ func computeDirBotSequence(seqs []string, key2Seq map[[2]string][]string) []stri
 	return dirBotSeqs
 }
 
-func computeFinalSeq(code string, num2Seq map[[2]string][]string, dir2Seq map[[2]string][]string) string {
-	// fmt.Println("Code", code)
-	// r0Seq := computeKeySequence(code, num2Seq)
-	// fmt.Println("R0", r0Seq)
-	// r1Seq := computeKeySequence(r0Seq, dir2Seq)
-	// fmt.Println("R1", r1Seq)
-	// r2Seq := computeKeySequence(r1Seq, dir2Seq)
-	// fmt.Println("R2", r2Seq)
-	// return r2Seq
+func computeFinalSeq(numRobots int, code string, num2Seq map[[2]string][]string, dir2Seq map[[2]string][]string) string {
+	defer utils.Duration(utils.Track(fmt.Sprintf("computeFinalSeq code: %s", code)))
 
-	dirBot1Seqs := []string{}
-	computeKeySequence(code, num2Seq, "", &dirBot1Seqs)
+	seqs := []string{}
+	computeKeySequence(code, num2Seq, "", &seqs)
 	// fmt.Println("Dir bot 1 Seqs", dirBot1Seqs)
-
-	dirBot2Seqs := computeDirBotSequence(dirBot1Seqs, dir2Seq)
-	// fmt.Println("Dir bot 2 Seqs")
-	// for _, seq := range dirBot2Seqs[len(dirBot2Seqs)-1:] {
-	// 	fmt.Println(seq)
+	// for _, seq := range seqs {
+	// 	fmt.Println("Code", code, "robot", 0, seq)
 	// }
 
-	dirBot3Seqs := computeDirBotSequence(dirBot2Seqs, dir2Seq)
-	// fmt.Println("Dir bot 3 Seqs")
-	minLen := len(dirBot3Seqs[0])
+	for range numRobots {
+		seqs = computeDirBotSequence(seqs, dir2Seq)
+	}
+	minLen := len(seqs[0])
 	minIdx := 0
-	for i, seq := range dirBot3Seqs {
+	for i, seq := range seqs {
 		if len(seq) < minLen {
 			minLen = len(seq)
 			minIdx = i
 		}
 	}
-	return dirBot3Seqs[minIdx]
+	return seqs[minIdx]
 }
 
 var codes = []string{
@@ -157,7 +151,7 @@ var codes = []string{
 	"189A",
 }
 
-func solvePart1(codes []string) int {
+func solvePart(numRobots int, codes []string) int {
 	numpadGrid := [][]string{
 		{"7", "8", "9"},
 		{"4", "5", "6"},
@@ -186,7 +180,7 @@ func solvePart1(codes []string) int {
 	// }
 	tot := 0
 	for _, code := range codes {
-		finalSeq := computeFinalSeq(code, num2Seq, dir2Seq)
+		finalSeq := computeFinalSeq(numRobots, code, num2Seq, dir2Seq)
 
 		numI64, err := strconv.ParseInt(code[:len(code)-1], 10, 64)
 		num := int(numI64)
@@ -201,6 +195,8 @@ func solvePart1(codes []string) int {
 }
 
 func Solve() {
-	res := solvePart1(codes)
+	res := solvePart(2, codes)
 	utils.PrintSolution(21, 1, res)
+	// res = solvePart(3, codes)
+	// utils.PrintSolution(21, 2, res)
 }
