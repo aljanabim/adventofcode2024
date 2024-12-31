@@ -25,5 +25,4 @@ func main() {
 	// day19.Solve()
 	// day20.Solve()
 	day21.Solve()
-
 }
