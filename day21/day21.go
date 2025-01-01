@@ -2,6 +2,8 @@ package day21
 
 import (
 	"fmt"
+	"slices"
+	"strconv"
 	"strings"
 
 	"github.com/aljanabim/adventofcode2024/utils"
@@ -19,29 +21,55 @@ func getKeySequence(seq string, keys string, depth int, key2Seq map[[2]string][]
 	result := []string{}
 	for _, path := range paths {
 		result = append(result, getKeySequence(seq, fmt.Sprintf("%s%s", keys, path), depth+1, key2Seq)...)
-		// getKeySequence(code[nextSeqStartIdx:], key2Seq, seq+path, seqs)
 	}
 	return result
 }
 
-func getAllSequences(seq string, path string, depth int, cache map[string][]string, key2Seq map[[2]string][]string) []string {
-	seqSplit := strings.SplitAfter(seq, "A")
-	subSeq := seqSplit[depth]
-	if depth == len(seqSplit)-1 {
-		return []string{path}
-	}
-	result := []string{}
-	var subSeqseqs []string
-	if val, ok := cache[subSeq]; ok {
-		subSeqseqs = val
+func getAllSeqs(seq string, cache map[string][]string, key2Seq map[[2]string][]string) []string {
+	if val, ok := cache[seq]; ok {
+		return val
 	} else {
-		subSeqseqs = getKeySequence(fmt.Sprintf("A%s", subSeq), "", 0, key2Seq)
-		cache[subSeq] = subSeqseqs
+		seqs := getKeySequence(fmt.Sprintf("A%s", seq), "", 0, key2Seq)
+		cache[seq] = seqs
+		return seqs
 	}
-	for _, subSeqSeq := range subSeqseqs {
-		result = append(result, getAllSequences(seq, fmt.Sprintf("%s%s", path, subSeqSeq), depth+1, cache, key2Seq)...)
+}
+
+type Record struct {
+	string
+	int
+}
+
+func getLengthOfShortestString(list []string) int {
+	minLen := len(list[0])
+	for _, seq := range list {
+		if len(seq) < minLen {
+			minLen = len(seq)
+		}
 	}
-	return result
+	return minLen
+}
+
+func getMinSequence(seqs []string, depth int, recordCache map[Record]int, allSeqCache map[string][]string, key2Seq map[[2]string][]string) int {
+	if depth == 0 {
+		return getLengthOfShortestString(seqs)
+	}
+	seqLengths := []int{}
+	for _, seq := range seqs {
+		seqLen := 0
+		seqSplit := strings.SplitAfter(seq, "A")
+		for _, subSeq := range seqSplit[:len(seqSplit)-1] {
+			if val, ok := recordCache[Record{subSeq, depth}]; ok {
+				seqLen += val
+				continue
+			}
+			subSeqLen := getMinSequence(getAllSeqs(subSeq, allSeqCache, key2Seq), depth-1, recordCache, allSeqCache, key2Seq)
+			recordCache[Record{subSeq, depth}] = subSeqLen
+			seqLen += subSeqLen
+		}
+		seqLengths = append(seqLengths, seqLen)
+	}
+	return slices.Min(seqLengths)
 }
 
 func solvePart2(numRobots int, codes []string) int {
@@ -56,38 +84,22 @@ func solvePart2(numRobots int, codes []string) int {
 		{"", "^", "A"},
 		{"<", "v", ">"},
 	}
-	seq2Seqs := map[string][]string{
-		// "029A": {"^^", "vv"},
-		// "980A": {">>", "<<"},
-	}
+	seq2Seqs := map[string][]string{}
 	num2Seq := createKeyMap(numpadGrid, [2]int{3, 0})
 	dir2Seq := createKeyMap(dirpadGrid, [2]int{0, 0})
 
-	defer utils.Duration(utils.Track("GetAllSeqs"))
+	tot := 0
+	for _, code := range codes {
+		seqs := getAllSeqs(code, seq2Seqs, num2Seq)
+		defer utils.Duration(utils.Track("GetAllSeqs"))
+		minLen := getMinSequence(seqs, numRobots, map[Record]int{}, seq2Seqs, dir2Seq)
 
-	code := codes[4]
-	seqs := getAllSequences(code, "", 0, seq2Seqs, num2Seq)
-	for range 2 {
-		newSeqs := []string{}
-		for _, seq := range seqs {
-			newSeqs = append(newSeqs, getAllSequences(seq, "", 0, seq2Seqs, dir2Seq)...)
+		numI64, err := strconv.ParseInt(code[:len(code)-1], 10, 64)
+		num := int(numI64)
+		if err != nil {
+			panic(err)
 		}
-		seqs = newSeqs
+		tot += num * minLen
 	}
-	for _, seq := range seqs {
-		fmt.Println("Final Seq for", code, ":", seq)
-	}
-	// fmt.Println("results", res)
-
-	return numRobots
+	return tot
 }
-
-/*
-
-5
-^^<A, <^^A => min(3,3)
-<AAv<A>>^A, v<<A>^AA>A => min(10,10)
-
-
-
-*/

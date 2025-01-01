@@ -54,7 +54,7 @@ import (
 // 	}
 // }
 
-func TestSolvePart2(t *testing.T) {
+func TestSolvePart2_testinput(t *testing.T) {
 	codes := []string{
 		"029A",
 		"980A",
@@ -64,6 +64,21 @@ func TestSolvePart2(t *testing.T) {
 	}
 	got := solvePart2(2, codes)
 	want := 126384
+	if got != want {
+		t.Fatalf("got %d want %d", got, want)
+	}
+}
+
+func TestSolvePart2_realinput(t *testing.T) {
+	codes := []string{
+		"789A",
+		"540A",
+		"285A",
+		"140A",
+		"189A",
+	}
+	got := solvePart2(2, codes)
+	want := 134120
 	if got != want {
 		t.Fatalf("got %d want %d", got, want)
 	}

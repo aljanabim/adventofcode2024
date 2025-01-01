@@ -195,8 +195,8 @@ func solvePart(numRobots int, codes []string) int {
 }
 
 func Solve() {
-	// res := solvePart(2, codes)
-	// utils.PrintSolution(21, 1, res)
-	res := solvePart2(25, codes)
+	res := solvePart(2, codes)
+	utils.PrintSolution(21, 1, res)
+	res = solvePart2(25, codes)
 	utils.PrintSolution(21, 2, res)
 }
