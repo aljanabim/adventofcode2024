@@ -14,9 +14,21 @@ func TestGenerateSecret(t *testing.T) {
 	}
 
 	for _, val := range values {
-		got := generateSecret(val.arg, 2000)
+		got := val.arg
+		for range 2000 {
+			got = generateSecret(got)
+		}
 		if got != val.want {
 			t.Errorf("generateSecret(%d) got %d want %d", val.arg, got, val.want)
 		}
+	}
+}
+
+func TestSolvePart2(t *testing.T) {
+	lines := []string{"1", "2", "3", "2024"}
+	got := solvePart2(lines)
+	want := 23
+	if got != want {
+		t.Fatalf("solvePart1(%v)=%d want %d", lines, got, want)
 	}
 }
