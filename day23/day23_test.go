@@ -35,7 +35,8 @@ func TestSolvePart(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
-	got := solvePart1(lines)
+	graph := buildGraph(lines)
+	got := solvePart1(graph)
 	want := 7
 	if got != want {
 		t.Fatalf("got %d want %d", got, want)
