@@ -66,11 +66,6 @@ func (g *Graph) getNeighbors(node string) []string {
 	return n
 }
 
-type Record struct {
-	string
-	int
-}
-
 func reverse[T any](values []T) []T {
 	newSlice := make([]T, len(values))
 	for i, j := 0, len(values)-1; i <= j; i, j = i+1, j-1 {
@@ -79,7 +74,7 @@ func reverse[T any](values []T) []T {
 	return newSlice
 }
 
-func (g *Graph) findCliques(node string, size int, visited map[string]bool) int {
+func (g *Graph) findCliques(node string, size int, visited map[string]bool) [][]string {
 	cycles := [][]string{}
 	visited[node] = true
 	for _, n := range g.getNeighbors(node) {
@@ -87,7 +82,7 @@ func (g *Graph) findCliques(node string, size int, visited map[string]bool) int 
 			g.dfs(n, node, size-1, []string{node, n}, &cycles, visited)
 		}
 	}
-	return len(cycles)
+	return cycles
 }
 
 func (g *Graph) dfs(node string, start string, depth int, path []string, cycles *[][]string, visited map[string]bool) bool {
@@ -128,55 +123,6 @@ func (g *Graph) dfs(node string, start string, depth int, path []string, cycles 
 	return false
 }
 
-func (g *Graph) findLargestClique(node string, size int, visited map[string]bool) int {
-	cycles := [][]string{}
-	visited[node] = true
-	for _, n := range g.getNeighbors(node) {
-		if !visited[n] {
-			g.dfsMax(n, node, size-1, []string{node, n}, &cycles, visited)
-		}
-	}
-	return len(cycles)
-}
-
-func (g *Graph) dfsMax(node string, start string, depth int, path []string, cycles *[][]string, visited map[string]bool) bool {
-	if depth == 0 {
-		return false
-	}
-	for _, n := range g.getNeighbors(node) {
-		if n == start && depth == 1 {
-			path = append(path, n)
-			// fmt.Println("== found start", n, path)
-			add := true
-			joined := strings.Join(path, "")
-			joinedRev := strings.Join(reverse(path), "")
-
-			for _, c := range *cycles {
-				cycleJoined := strings.Join(c, "")
-				if cycleJoined == joined || cycleJoined == joinedRev {
-					add = false
-				}
-			}
-
-			if add {
-				newPath := make([]string, len(path))
-				copy(newPath, path)
-				*cycles = append(*cycles, newPath)
-			}
-			return true
-		}
-		if !slices.Contains(path, n) && !visited[n] {
-			// fmt.Println(">> from", node, "visit", n, path)
-			path = append(path, n)
-			g.dfsMax(n, start, depth-1, path, cycles, visited)
-			// back track path
-			path = path[:len(path)-1]
-
-		}
-	}
-	return false
-}
-
 func buildGraph(lines []string) *Graph {
 	graph := Graph{}
 	for _, line := range lines {
@@ -193,10 +139,34 @@ func solvePart1(graph *Graph) int {
 	for _, node := range graph.nodes {
 		if node[0] == 't' {
 			cliques := graph.findCliques(node, 3, visited)
-			count += cliques
+			count += len(cliques)
 		}
 	}
 	return count
+}
+
+func solvePart2(graph *Graph) string {
+	defer utils.Duration(utils.Track("Part 1"))
+	visited := map[string]bool{}
+	largestClique := [][]string{}
+	newGraph := Graph{}
+
+	for _, node := range graph.nodes {
+		if node[0] == 't' {
+			cliques := graph.findCliques(node, 3, visited)
+			if len(cliques) > len(largestClique) {
+				largestClique = cliques
+			}
+		}
+	}
+
+	for _, clique := range largestClique {
+		for _, node := range clique {
+			newGraph.addNode(node)
+		}
+	}
+	slices.Sort(newGraph.nodes)
+	return strings.Join(newGraph.nodes, ",")
 }
 
 func Solve() {
@@ -207,5 +177,6 @@ func Solve() {
 	graph := buildGraph(lines)
 	res := solvePart1(graph)
 	utils.PrintSolution(23, 1, res)
-
+	password := solvePart2(graph)
+	utils.PrintSolution(23, 2, password)
 }
