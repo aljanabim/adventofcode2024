@@ -76,21 +76,27 @@ func createMaze(lines []string) Maze {
 	}
 	return maze
 }
-func dfs(node *Node, depth, cost int, path []*Node, dist []int, heading Heading, visited map[[2]int]bool) {
-	fmt.Println("At", node.Pos, "headed", heading, "cost", cost, "depth", depth)
-	visited[node.Pos] = true
+func dfs(node *Node, depth, cost int, path []*Node, altPath []*Node, dist []int, heading Heading, visited map[[2]int]bool) []*Node {
+	altPath = append(altPath, node)
+	// fmt.Println("At", node.Pos, "headed", heading, "cost", cost, "depth", depth)
 	if depth > 0 && slices.Contains(path, node) {
-		fmt.Println("Reached a pre visited point", node.Pos, cost, "opt cost", dist[node.Id])
-		return
+		// check heading of point following the current point
+		nextPointHeading := path[min(slices.Index(path, node)+1, len(path)-1)].Heading
+		if heading != nextPointHeading {
+			cost += 1000
+		}
+		if cost == dist[node.Id] {
+			// fmt.Println("Reached a pre visited point", node.Pos, cost, "opt cost", dist[node.Id])
+			// for _, n := range altPath {
+			// 	fmt.Println("new pos", n.Pos)
+			// }
+			return altPath
+		}
+		return []*Node{}
 	}
+	visited[node.Pos] = true
 
-	// if node == endNode {
-	// 	fmt.Println("Reached end", cost, *minCost, len(path))
-	// 	if cost < *minCost {
-	// 		*minCost = cost
-	// 	}
-	// 	return
-	// }
+	var out []*Node
 
 	if node.Up != nil && !visited[node.Up.Pos] {
 		turnCost := 0
@@ -98,7 +104,7 @@ func dfs(node *Node, depth, cost int, path []*Node, dist []int, heading Heading,
 			turnCost = 1000
 		}
 		newCost := cost + 1 + turnCost
-		dfs(node.Up, depth+1, newCost, path, dist, UP, visited)
+		out = append(out, dfs(node.Up, depth+1, newCost, path, altPath, dist, UP, visited)...)
 	}
 	if node.Right != nil && !visited[node.Right.Pos] {
 		turnCost := 0
@@ -106,7 +112,7 @@ func dfs(node *Node, depth, cost int, path []*Node, dist []int, heading Heading,
 			turnCost = 1000
 		}
 		newCost := cost + 1 + turnCost
-		dfs(node.Right, depth+1, newCost, path, dist, RIGHT, visited)
+		out = append(out, dfs(node.Right, depth+1, newCost, path, altPath, dist, RIGHT, visited)...)
 	}
 	if node.Down != nil && !visited[node.Down.Pos] {
 		turnCost := 0
@@ -114,7 +120,7 @@ func dfs(node *Node, depth, cost int, path []*Node, dist []int, heading Heading,
 			turnCost = 1000
 		}
 		newCost := cost + 1 + turnCost
-		dfs(node.Down, depth+1, newCost, path, dist, DOWN, visited)
+		out = append(out, dfs(node.Down, depth+1, newCost, path, altPath, dist, DOWN, visited)...)
 	}
 	if node.Left != nil && !visited[node.Left.Pos] {
 		turnCost := 0
@@ -122,8 +128,9 @@ func dfs(node *Node, depth, cost int, path []*Node, dist []int, heading Heading,
 			turnCost = 1000
 		}
 		newCost := cost + 1 + turnCost
-		dfs(node.Left, depth+1, newCost, path, dist, LEFT, visited)
+		out = append(out, dfs(node.Left, depth+1, newCost, path, altPath, dist, LEFT, visited)...)
 	}
+	return out
 }
 
 func computeCost(source *Node, target *Node, heading Heading, queue, dist, prev []int) {
@@ -203,7 +210,8 @@ func solvePart2(lines []string) int {
 	}
 
 	dist, prev := dijkstra(nodes, maze.Start, maze.End, maze.Height*maze.Width*1000)
-	// distToEnd := dist[maze.End.Id]
+	distToEnd := dist[maze.End.Id]
+	fmt.Println(distToEnd)
 	// slices.Sort(dist)
 	nextId := maze.End.Id
 	optimalPath := []*Node{}
@@ -214,23 +222,50 @@ func solvePart2(lines []string) int {
 	optimalPath = append(optimalPath, maze.Start)
 	slices.Reverse(optimalPath)
 	// Find all optimal paths
-	visited := map[[2]int]bool{optimalPath[0].Pos: true}
-	for i, step := range optimalPath[1:3] {
-		visited[step.Pos] = true
-		fmt.Println("Starting from", step.Pos, optimalPath[i].Heading)
-		dfs(step, 0, dist[step.Id], optimalPath, dist, optimalPath[i].Heading /*heading of prev step*/, visited)
-		fmt.Println(step.Pos, dist[step.Id])
+	altPath := []*Node{}
+	for i, step := range optimalPath[:len(optimalPath)-1] {
+		visited := map[[2]int]bool{optimalPath[0].Pos: true}
+		for _, sTmp := range optimalPath[:i] {
+			visited[sTmp.Pos] = true
+		}
+		tmpNode := optimalPath[i+1]
+		optimalPath[i+1] = nil
+		// fmt.Println("Starting from", step.Pos, step.Heading)
+		altPathTmp := dfs(step, 0, dist[step.Id], optimalPath, []*Node{}, dist, step.Heading /*heading of prev step*/, visited)
+		optimalPath[i+1] = tmpNode
+		for _, n := range altPathTmp {
+			if !slices.Contains(optimalPath, n) && !slices.Contains(altPath, n) {
+				altPath = append(altPath, n)
+			}
+		}
 	}
-	return dist[maze.End.Id]
+	// print grid
+	// for row := range maze.Height + 1 {
+	// 	for col := range maze.Width {
+	// 		if n, ok := maze.Nodes[[2]int{row, col}]; ok {
+	// 			if slices.Contains(optimalPath, n) {
+	// 				fmt.Printf("O")
+	// 			} else if slices.Contains(altPath, n) {
+	// 				fmt.Printf("X")
+	// 			} else {
+	// 				fmt.Printf(".")
+	// 			}
+	// 		} else {
+	// 			fmt.Print("#")
+	// 		}
+	// 	}
+	// 	fmt.Println()
+	// }
+	return len(optimalPath) + len(altPath)
 }
 
 func Solve() {
-	lines, err := utils.ReadLines("day16/input_mini3.txt")
+	lines, err := utils.ReadLines("day16/input.txt")
 	if err != nil {
 		panic(err)
 	}
-	// res := solvePart1(lines)
-	// utils.PrintSolution(16, 1, res)
-	res := solvePart2(lines)
+	res := solvePart1(lines)
+	utils.PrintSolution(16, 1, res)
+	res = solvePart2(lines)
 	utils.PrintSolution(16, 2, res)
 }
