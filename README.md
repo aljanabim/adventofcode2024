@@ -17,5 +17,11 @@ Inspiration for graph algorithm of day 6 [https://github.com/APMorto/aoc2024/tre
     -   To find every combination in DFS, put the return outside the for-loop
     -   Cache a recursive function after the recursive call mapping input to its return value.
 -   Day 20
+
     -   When computing an alternative path, remember to subtract the new path cost from the original path to get the savings
     -   In a discrete grid, stick to Abs() to compute distances, don't use continuous approaches like pythagoras theorem which account for diagonal distances.
+
+-   Day 23
+    -   Finds loops of a particular size in an undirected graph using DFS
+-   Day 16
+    -   Dijkstra to find optimal path with turning and DFS to find all other optimal paths
